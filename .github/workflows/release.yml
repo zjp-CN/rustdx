@@ -36,9 +36,9 @@ jobs:
         run: mv target/release/rustdx target/release/rustdx-linux
 
       # Condition to only run this whenever the runner os is Windows
-      - name: Build Release Win
-        if: matrix.os == 'windows-latest'
-        run: mv target/release/rustdx target/release/rustdx-win
+      # - name: Build Release Win
+      #   if: matrix.os == 'windows-latest'
+      #   run: mv target/release/rustdx.exe target/release/rustdx.exe
 
       # This will draft a new release & will attach the binaries produced by the above outputs.
       # You still need to publish this release though after job ends.
@@ -50,5 +50,6 @@ jobs:
           draft: true
           files: |
             ./target/release/rustdx-*
+            ./target/release/rustdx.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # You don't need to add this in secrets it's by default.
