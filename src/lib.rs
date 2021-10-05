@@ -1,7 +1,7 @@
 #![doc(html_root_url = "https://docs.rs/rustdx/0.2.2")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![feature(test)]
-extern crate test;
+// #![feature(test)]
+// extern crate test;
 
 pub mod bytes_helper;
 
