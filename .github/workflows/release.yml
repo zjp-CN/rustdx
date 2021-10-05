@@ -19,7 +19,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: stable
           default: true
           profile: minimal
       - name: Build
@@ -46,7 +46,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          # name: Release ${{ github.ref }}
           draft: true
           files: |
             ./target/release/rustdx-*
