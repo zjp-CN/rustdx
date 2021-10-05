@@ -22,12 +22,22 @@
 
 ## rustdx-cmd
 
-### 安装方式
+### 安装
 
-1. cargo install：
+使用以下一种方式即可：
 
-```shell
-CARGO_PROFILE_RELEASE_LTO=true CARGO_PROFILE_RELEASE_OPT_LEVEL=3 cargo install rustdx-cmd
+1. 下载 [已编译的 release 版本](https://github.com/zjp-CN/rustdx/releases/latest)
+
+2. cargo install：
+```console
+$ CARGO_PROFILE_RELEASE_LTO=true CARGO_PROFILE_RELEASE_OPT_LEVEL=3 cargo install rustdx-cmd
+```
+
+3. cargo build：
+```console
+$ git clone https://github.com/zjp-CN/rustdx.git
+$ cd rustdx
+$ cargo build -p rustdx-cmd --release
 ```
 
 ### 子命令
@@ -39,7 +49,7 @@ CARGO_PROFILE_RELEASE_LTO=true CARGO_PROFILE_RELEASE_OPT_LEVEL=3 cargo install r
 
 准备好 day 文件、gbbq 文件和 ClickHouse 数据库：
 
-```shell
+```console
 # 解析所有最新股票的历史日线数据，且计算复权数据
 $ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq
 # 写入 ClickHouse 数据库
