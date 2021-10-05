@@ -1,0 +1,53 @@
+# from: https://faun.pub/automate-your-build-release-with-github-actions-367c0febf5fd
+
+name: Release CI
+on: [push]
+jobs:
+  deploy:
+    # A strategy is used to define various build environments this job will run.
+    #
+    # To say it simple, this will create 3 separate independent jobs which will
+    # run on ubuntu, mac & windows.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    # Runs when the commit message contains "[Release]"
+    if: "contains(github.event.head_commit.message, '[Release]')"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      - name: Build
+        run: cargo build -p rustdx-cmd --release
+
+      # Condition to only run this whenever the runner os is Mac
+      - name: Build Release Mac
+        if: matrix.os == 'macos-latest'
+        run: mv target/release/rustdx target/release/rustdx-macos
+          
+      # Condition to only run this whenever the runner os is Ubuntu
+      - name: Build Release Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: mv target/release/rustdx target/release/rustdx-linux
+
+      # Condition to only run this whenever the runner os is Windows
+      - name: Build Release Win
+        if: matrix.os == 'windows-latest'
+        run: mv target/release/rustdx target/release/rustdx-win
+
+      # This will draft a new release & will attach the binaries produced by the above outputs.
+      # You still need to publish this release though after job ends.
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          files: |
+            ./target/release/rustdx-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # You don't need to add this in secrets it's by default.
