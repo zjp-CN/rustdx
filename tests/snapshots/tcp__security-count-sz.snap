@@ -1,0 +1,29 @@
+---
+source: tests/tcp.rs
+expression: count
+
+---
+SecurityCount {
+    send: [
+        12,
+        12,
+        24,
+        108,
+        0,
+        1,
+        8,
+        0,
+        8,
+        0,
+        78,
+        4,
+        0,
+        0,
+        117,
+        199,
+        51,
+        1,
+    ],
+    market: 0,
+    count: 13471,
+}

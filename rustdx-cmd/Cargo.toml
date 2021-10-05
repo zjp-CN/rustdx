@@ -1,0 +1,69 @@
+[package]
+name        = "rustdx-cmd"
+version     = "0.1.1"
+edition     = "2021"
+license     = "MIT"
+description = "受 pytdx 启发的 A 股数据获取库"
+repository  = "https://gitee.com/ZIP97/rustdx"
+authors     = ["zjp <jiping_zhou@foxmail.com>"]
+exclude     = ["assets", "examples", "benches", "tests"]
+
+[dependencies]
+anyhow   = "1"
+argh     = {version = "0.1" , optional = true}
+calamine = {version = "0.18", optional = true}
+futures  = {version = "0.3" , optional = true}
+tokio    = {version = "1"   , optional = true}
+# rustdx   = {path    = "../" , optional = true}
+reqwest  = {version = "0.11", optional = true}
+bytes    = {version = "1.1" , optional = true}
+csv      = {version = "1.1" , optional = true}
+log      = {version = "0.4" , optional = true}
+chrono   = {version = "0.4" , optional = true}
+serde_json  = {version = "1", optional = true}
+lazy_static = {version = "1", optional = true}
+mini-redis  = {version = "0.4", optional = true}
+subprocess  = {version = "0.2", optional = true}
+simplelog   = {version ="0.10", optional = true}
+miniz_oxide = {version ="0.4", optional = true}
+
+[dependencies.rustdx]
+version  = "0.2.1"
+optional = true
+path = "../"
+
+[dependencies.serde]
+version  = "1"
+optional = true
+features = ["derive"]
+
+[features]
+default = ["bin"]
+bin = ["rustdx/serde", "tokio/rt",  "tokio/rt-multi-thread", "futures", "argh", "calamine", "lazy_static", "reqwest", "csv", "subprocess", "reqwest/json", "serde", "serde_json", "chrono", "log", "simplelog"]
+excel = ["calamine", "reqwest", "tokio/rt",  "tokio/rt-multi-thread", "futures"]
+clickhouse = ["tokio/macros", "tokio/sync", "csv"]
+
+[[bin]]
+name = "rustdx"
+path = "src/main.rs"
+required-features = ["bin"]
+
+[[example]]
+name = "excel"
+path = "examples/excel.rs"
+required-features = ["excel"]
+
+[[example]]
+name = "excel_and_online"
+path = "examples/excel_and_online.rs"
+required-features = ["excel"]
+
+[[example]]
+name = "clickhouse-cmd"
+path = "examples/clickhouse-cmd.rs"
+required-features = ["clickhouse"]
+
+[[example]]
+name = "tcp"
+path = "examples/tcp.rs"
+required-features = ["rustdx/tcp"]

@@ -1,0 +1,58 @@
+[package]
+name        = "rustdx"
+version     = "0.2.3"
+edition     = "2021"
+license     = "MIT"
+description = "受 pytdx 启发的 A 股数据获取库"
+repository  = "https://gitee.com/ZIP97/rustdx"
+authors     = ["zjp <jiping_zhou@foxmail.com>"]
+exclude     = ["assets", "examples", "benches", "tests"]
+
+[dependencies]
+chrono  = {version = "0.4",     optional = true}
+lazy_static = {version = "1",   optional = true}
+miniz_oxide = {version = "0.4", optional = true}
+
+# anyhow    = "1"
+thiserror = "1"
+log = {version = "0.4", optional = true}
+
+[dependencies.serde]
+version  = "1"
+optional = true
+features = ["derive"]
+# default-features = false
+
+[dependencies.encoding_rs]
+version  = "0.8"
+optional = true
+features = ["fast-gb-hanzi-encode"]
+
+[features]
+default       = ["file"]
+full          = ["file", "tcp", "encoding_rs"]
+tcp           = ["miniz_oxide", "lazy_static", "serde", "log"]
+file          = []
+
+[dev-dependencies]
+# backtrace 是在 cargo test 无法并行的情况下 用于产生 test name （从而产生 snapshot name ）
+insta = {version = "1.8", features = ["backtrace"]} 
+version-sync = {version = "0.9", default-features = false, features = ["html_root_url_updated"]}
+
+[profile.bench]
+lto = true
+opt-level = 3
+
+[profile.release]
+lto = true
+opt-level = 3
+
+[workspace]
+members = ["rustdx-cmd"]
+
+# docs.rs-specific configuration
+[package.metadata.docs.rs]
+# document all features
+all-features = true
+# defines the configuration attribute `docsrs`
+rustdoc-args = ["--cfg", "docsrs"]

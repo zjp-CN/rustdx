@@ -1,0 +1,6 @@
+assets
+target
+rustdx-cmd/rustdx.log
+rustdx-cmd/stocks.csv
+rustdx-cmd/eastmoney.csv
+
