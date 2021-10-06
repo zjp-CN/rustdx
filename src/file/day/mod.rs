@@ -1,6 +1,7 @@
 use std::path::Path;
 
 #[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub mod fq;
 
 /// 解析 `*.day` 文件中的一条日线数据，即其 32 个字节所代表的所有信息。
@@ -12,14 +13,14 @@ pub mod fq;
 /// [`serde_type::Day`]: crate::serde_type::Day
 #[derive(Debug, Clone, Copy)]
 pub struct Day {
-    pub date:   u32,
-    pub code:   u32,
-    pub open:   f32,
-    pub high:   f32,
-    pub low:    f32,
-    pub close:  f32,
+    pub date: u32,
+    pub code: u32,
+    pub open: f32,
+    pub high: f32,
+    pub low: f32,
+    pub close: f32,
     pub amount: f32,
-    pub vol:    u32,
+    pub vol: u32,
 }
 
 impl Day {
@@ -46,18 +47,20 @@ impl Day {
     /// 日：20210810%10000%100 = 10
     pub fn from_bytes(code: u32, arr: &[u8]) -> Self {
         use crate::bytes_helper::{f32_from_le_bytes, u32_from_le_bytes};
-        Self { date: u32_from_le_bytes(arr, 0),
-               open: u32_from_le_bytes(arr, 4) as f32 / 100.,
-               high: u32_from_le_bytes(arr, 8) as f32 / 100.,
-               low: u32_from_le_bytes(arr, 12) as f32 / 100.,
-               close: u32_from_le_bytes(arr, 16) as f32 / 100.,
-               amount: f32_from_le_bytes(arr, 20),
-               vol: u32_from_le_bytes(arr, 24),
-               code }
+        Self {
+            date: u32_from_le_bytes(arr, 0),
+            open: u32_from_le_bytes(arr, 4) as f32 / 100.,
+            high: u32_from_le_bytes(arr, 8) as f32 / 100.,
+            low: u32_from_le_bytes(arr, 12) as f32 / 100.,
+            close: u32_from_le_bytes(arr, 16) as f32 / 100.,
+            amount: f32_from_le_bytes(arr, 20),
+            vol: u32_from_le_bytes(arr, 24),
+            code,
+        }
     }
 
     /// 一次性以**同步**方式读取单个 `*.day` 文件所有数据，然后转化成 Vec。
-    pub fn file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> Result<Vec<Day>, crate::Error> {
+    pub fn file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Day>> {
         Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
     }
 
@@ -73,20 +76,24 @@ impl Day {
     /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
     #[cfg(feature = "serde")]
     pub fn into_serde_type(self) -> crate::serde_type::Day {
-        crate::serde_type::Day { code:   format!("{:06}", self.code),
-                                 date:   self.date_string(),
-                                 open:   self.open,
-                                 high:   self.high,
-                                 low:    self.low,
-                                 close:  self.close,
-                                 // 单位：元
-                                 amount: self.amount,
-                                 // 转换成手：方便与其他数据源汇合
-                                 vol:    self.vol as f32 / 100., }
+        crate::serde_type::Day {
+            code: format!("{:06}", self.code),
+            date: self.date_string(),
+            open: self.open,
+            high: self.high,
+            low: self.low,
+            close: self.close,
+            // 单位：元
+            amount: self.amount,
+            // 转换成手：方便与其他数据源汇合
+            vol: self.vol as f32 / 100.,
+        }
     }
 
     /// `%Y-%m-%d` 格式的日期
-    pub fn date_string(&self) -> String { crate::bytes_helper::date_string(self.date) }
+    pub fn date_string(&self) -> String {
+        crate::bytes_helper::date_string(self.date)
+    }
 
     /// `[年, 月, 日]` 格式的日期
     pub fn ymd_arr(&self) -> [u32; 3] {
