@@ -20,16 +20,6 @@
 
 具体文档待补充。
 
-## TODO
-
-近期计划：
-- [] 【rustdx】增加 day 前复权测试用例（有些特例 #000001# 上市日因子不是 1，需要 fix bug）
-- [] 【rustdx-cmd】针对 ClickHouse 和复权情况下，数据录入与导出子命令
-
-远期计划：
-- [] 【rustdx】增加数据源
-- [] 【rustdx-cmd】拆分非 tdx 数据源到新 crate
-
 ## rustdx-cmd
 
 ### 安装

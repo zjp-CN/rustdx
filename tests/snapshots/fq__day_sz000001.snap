@@ -1,0 +1,34 @@
+---
+source: tests/fq.rs
+expression: "&fq[..3]"
+
+---
+[
+    Fq {
+        code: 1,
+        date: 19910403,
+        factor: 1.0,
+        close: 49.0,
+        preclose: 49.0,
+        trading: true,
+        xdxr: false,
+    },
+    Fq {
+        code: 1,
+        date: 19910404,
+        factor: 0.9951020065619021,
+        close: 48.7599983215332,
+        preclose: 49.0,
+        trading: true,
+        xdxr: false,
+    },
+    Fq {
+        code: 1,
+        date: 19910405,
+        factor: 0.9902040909747688,
+        close: 48.52000045776367,
+        preclose: 48.7599983215332,
+        trading: true,
+        xdxr: false,
+    },
+]
