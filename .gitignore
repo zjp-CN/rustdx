@@ -1,5 +1,5 @@
-assets
-target
+old/
+target/
 rustdx.log
 rustdx-cmd/rustdx.log
 rustdx-cmd/stocks.csv
