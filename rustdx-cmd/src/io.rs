@@ -12,9 +12,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-const DATABASE: &'static str = "rustdx";
-const TABLE: &'static str = "rustdx.tmp";
-const QUERY: &'static str = "INSERT INTO rustdx.tmp FORMAT CSVWithNames";
 const BUFFER_SIZE: usize = 32 * (1 << 20); // 32M
 
 /// TODO 协程解析、异步缓冲写入（利用多核优势）
@@ -85,7 +82,7 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
 
     // 前收
     let previous = if let Some(Some(path)) = cmd.previous.as_ref().map(|p| p.to_str()) {
-        if path == "clickhouse" { clickhouse_factor() } else { pre_factor(dbg!(path)) }?
+        if path == "clickhouse" { clickhouse_factor(&cmd.table) } else { pre_factor(dbg!(path)) }?
     } else {
         return Err(anyhow!("请检查 gbbq 路径"));
     };
@@ -154,8 +151,13 @@ pub fn pre_factor(p: impl AsRef<Path>) -> Result<std::collections::HashMap<u32, 
                                                .collect())
 }
 
-fn db_setup_clickhouse(fq: bool) -> Result<()> {
-    let create_database = format!("CREATE DATABASE IF NOT EXISTS {}", DATABASE);
+fn database_table(table: &str) -> (&str, &str) {
+    let pos = table.find('.').unwrap();
+    table.split_at(pos) // (database_name, table_name)
+}
+
+fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
+    let create_database = format!("CREATE DATABASE IF NOT EXISTS {}", database_table(table).0);
     let output = Command::new("clickhouse-client").args(["--query", &create_database]).output()?;
     check_output(output);
     #[rustfmt::skip]
@@ -176,7 +178,7 @@ fn db_setup_clickhouse(fq: bool) -> Result<()> {
             )
             ENGINE = MergeTree()
             ORDER BY (date, code)
-        ", TABLE)
+        ", table)
     } else {
         format!("
             CREATE TABLE IF NOT EXISTS {}
@@ -192,7 +194,7 @@ fn db_setup_clickhouse(fq: bool) -> Result<()> {
             )
             ENGINE = MergeTree()
             ORDER BY (date, code)
-        ", TABLE)
+        ", table)
     }; // PARTITION BY 部分可能需要去掉
     let output = Command::new("clickhouse-client").args(["--query", &create_table]).output()?;
     check_output(output);
@@ -202,10 +204,11 @@ fn db_setup_clickhouse(fq: bool) -> Result<()> {
 /// clickhouse-client --query "INSERT INTO table FORMAT CSVWithNames" < clickhouse[.csv]
 pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
     use subprocess::{Exec, Redirection};
-    db_setup_clickhouse(cmd.gbbq.is_some())?;
+    setup_clickhouse(cmd.gbbq.is_some(), &cmd.table)?;
     cmd.run_csv()?;
     let file = File::open(&cmd.output)?;
-    let capture = Exec::cmd("clickhouse-client").args(&["--query", QUERY])
+    let query = format!("INSERT INTO {} FORMAT CSVWithNames", cmd.table);
+    let capture = Exec::cmd("clickhouse-client").args(&["--query", &query])
                                                 .stdin(Redirection::File(file))
                                                 .capture()?;
     println!("stdout:\n{}stderr:\n{}", capture.stdout_str(), capture.stderr_str());
@@ -215,7 +218,7 @@ pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
 }
 
 /// 获取当前最新 factor
-fn clickhouse_factor() -> Result<std::collections::HashMap<u32, Factor>> {
+fn clickhouse_factor(table: &str) -> Result<std::collections::HashMap<u32, Factor>> {
     let args =
         ["--query",
          &format!("WITH (
@@ -231,7 +234,7 @@ fn clickhouse_factor() -> Result<std::collections::HashMap<u32, Factor>> {
                     WHERE latest = date
                     INTO OUTFILE 'factor.csv'
                     FORMAT CSVWithNames;",
-                  TABLE)];
+                  table)];
     let output = Command::new("clickhouse-client").args(args).output()?;
     check_output(output);
     pre_factor("factor.csv")
@@ -241,8 +244,11 @@ fn clickhouse_factor() -> Result<std::collections::HashMap<u32, Factor>> {
 pub fn run_mongodb(cmd: &DayCmd) -> Result<()> {
     cmd.run_csv()?;
     // TODO:排查为什么 date 列无法变成 date 类型 date.date(2006-01-02)
-    let args = ["--db=rustdx",
-                "--collection=day",
+    let (database_name, table_name) = database_table(&cmd.table);
+    let args = ["--db",
+                database_name,
+                "--collection",
+                table_name,
                 "--type=csv",
                 "--file",
                 &cmd.output,

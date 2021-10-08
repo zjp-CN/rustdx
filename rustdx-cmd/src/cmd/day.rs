@@ -53,11 +53,20 @@ pub struct DayCmd {
     /// 可选。显示详细的使用说明。
     #[argh(option, short = 'h')]
     description: Vec<String>,
+
+    // /// 可选。指定数据库（数据集）的名称，默认为 `rustdx`。
+    // #[argh(option, short = 'd', default = "String::from(\"rustdx\")")]
+    // pub database: String,
+    /// 可选。指定表名称，默认为 `tmp`。
+    #[argh(option, short = 't', default = "String::from(\"tmp\")")]
+    pub table: String,
 }
 
 pub type Stocklist = std::collections::HashSet<String>;
 
 impl DayCmd {
+    // pub const A: &'static str = "";
+
     pub fn run(&self) -> Result<()> {
         match self.output.as_str() {
             "clickhouse" => crate::io::run_clickhouse(self),
