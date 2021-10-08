@@ -80,16 +80,15 @@ pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
 /// TODO 协程解析、异步缓冲写入（利用多核优势）
 pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
     // 股本变迁
-    let mut bytes = if let Some(Some(path)) = cmd.gbbq.as_ref().map(|p| p.to_str()) {
-        if path == "clickhouse" { clickhouse_factor() } else { fs::read(path) }?
-    } else {
-        return Err(anyhow!("请检查 gbbq 路径"));
-    };
+    let mut bytes = fs::read(cmd.gbbq.as_ref().unwrap())?;
     let gbbq = Gbbq::filter_hashmap(Gbbq::iter(&mut bytes[4..]));
 
     // 前收
-    let previous =
-        pre_factor(cmd.previous.as_ref().ok_or(anyhow!("请检查“前收盘价”文件的路径"))?)?;
+    let previous = if let Some(Some(path)) = cmd.previous.as_ref().map(|p| p.to_str()) {
+        if path == "clickhouse" { clickhouse_factor() } else { pre_factor(dbg!(path)) }?
+    } else {
+        return Err(anyhow!("请检查 gbbq 路径"));
+    };
 
     // 股票列表
     let hm = cmd.stocklist();
@@ -204,7 +203,7 @@ fn db_setup_clickhouse(fq: bool) -> Result<()> {
 pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
     use subprocess::{Exec, Redirection};
     db_setup_clickhouse(cmd.gbbq.is_some())?;
-    run_csv(cmd)?;
+    cmd.run_csv()?;
     let file = File::open(&cmd.output)?;
     let capture = Exec::cmd("clickhouse-client").args(&["--query", QUERY])
                                                 .stdin(Redirection::File(file))
@@ -216,7 +215,7 @@ pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
 }
 
 /// 获取当前最新 factor
-fn clickhouse_factor() -> io::Result<Vec<u8>> {
+fn clickhouse_factor() -> Result<std::collections::HashMap<u32, Factor>> {
     let args =
         ["--query",
          &format!("WITH (
@@ -235,12 +234,12 @@ fn clickhouse_factor() -> io::Result<Vec<u8>> {
                   TABLE)];
     let output = Command::new("clickhouse-client").args(args).output()?;
     check_output(output);
-    Ok(fs::read("factor.csv")?)
+    pre_factor("factor.csv")
 }
 
 /// TODO: 与数据库有关的，把库名、表名可配置
 pub fn run_mongodb(cmd: &DayCmd) -> Result<()> {
-    run_csv(cmd)?;
+    cmd.run_csv()?;
     // TODO:排查为什么 date 列无法变成 date 类型 date.date(2006-01-02)
     let args = ["--db=rustdx",
                 "--collection=day",

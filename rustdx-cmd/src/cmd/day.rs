@@ -61,16 +61,21 @@ impl DayCmd {
     pub fn run(&self) -> Result<()> {
         match self.output.as_str() {
             "clickhouse" => crate::io::run_clickhouse(self),
-            x if x.ends_with("csv") && self.gbbq.is_some() => {
-                if self.previous.is_some() {
-                    crate::io::run_csv_fq_previous(self)
-                } else {
-                    crate::io::run_csv_fq(self)
-                }
-            }
-            x if x.ends_with("csv") => crate::io::run_csv(self),
+            x if x.ends_with("csv") => self.run_csv(),
             "mongodb" => crate::io::run_mongodb(self),
             _ => todo!(),
+        }
+    }
+
+    pub fn run_csv(&self) -> Result<()> {
+        if self.gbbq.is_some() {
+            if self.previous.is_some() {
+                crate::io::run_csv_fq_previous(self)
+            } else {
+                crate::io::run_csv_fq(self)
+            }
+        } else {
+            crate::io::run_csv(self)
         }
     }
 
