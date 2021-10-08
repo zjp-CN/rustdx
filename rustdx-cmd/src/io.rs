@@ -5,16 +5,16 @@ use rustdx::file::{
     gbbq::{Factor, Gbbq},
 };
 use std::{
-    fs::File,
-    io::Write,
+    fs::{self, File},
+    io::{self, Write},
     path::Path,
     process::Command,
     sync::{Arc, Mutex},
 };
 
 const DATABASE: &'static str = "rustdx";
-const TABLE: &'static str = "rustdx.day_cmd";
-const QUERY: &'static str = "INSERT INTO rustdx.day_cmd FORMAT CSVWithNames";
+const TABLE: &'static str = "rustdx.tmp";
+const QUERY: &'static str = "INSERT INTO rustdx.tmp FORMAT CSVWithNames";
 const BUFFER_SIZE: usize = 32 * (1 << 20); // 32M
 
 /// TODO 协程解析、异步缓冲写入（利用多核优势）
@@ -47,7 +47,7 @@ pub fn run_csv(cmd: &DayCmd) -> Result<()> {
 /// TODO 协程解析、异步缓冲写入（利用多核优势）
 pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
     // 股本变迁
-    let mut bytes = std::fs::read(cmd.gbbq.as_ref().unwrap())?;
+    let mut bytes = fs::read(cmd.gbbq.as_ref().unwrap())?;
     let gbbq = Gbbq::filter_hashmap(Gbbq::iter(&mut bytes[4..]));
 
     // 股票列表
@@ -80,7 +80,11 @@ pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
 /// TODO 协程解析、异步缓冲写入（利用多核优势）
 pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
     // 股本变迁
-    let mut bytes = std::fs::read(cmd.gbbq.as_ref().unwrap())?;
+    let mut bytes = if let Some(Some(path)) = cmd.gbbq.as_ref().map(|p| p.to_str()) {
+        if path == "clickhouse" { clickhouse_factor() } else { fs::read(path) }?
+    } else {
+        return Err(anyhow!("请检查 gbbq 路径"));
+    };
     let gbbq = Gbbq::filter_hashmap(Gbbq::iter(&mut bytes[4..]));
 
     // 前收
@@ -151,26 +155,46 @@ pub fn pre_factor(p: impl AsRef<Path>) -> Result<std::collections::HashMap<u32, 
                                                .collect())
 }
 
-fn db_setup_clickhouse() -> Result<()> {
+fn db_setup_clickhouse(fq: bool) -> Result<()> {
     let create_database = format!("CREATE DATABASE IF NOT EXISTS {}", DATABASE);
     let output = Command::new("clickhouse-client").args(["--query", &create_database]).output()?;
     check_output(output);
     #[rustfmt::skip]
-    let create_table = format!("
-        CREATE TABLE IF NOT EXISTS {}
-        (
-            `date` Date CODEC(DoubleDelta),
-            `code` FixedString(6),
-            `open` Float32,
-            `high` Float32,
-            `low` Float32,
-            `close` Float32,
-            `amount` Float64,
-            `vol` Float64
-        )
-        ENGINE = MergeTree()
-        ORDER BY (date, code)
-    ", TABLE); // PARTITION BY 部分可能需要去掉
+    let create_table = if fq {
+        format!("
+            CREATE TABLE IF NOT EXISTS {}
+            (
+                `date` Date CODEC(DoubleDelta),
+                `code` FixedString(6),
+                `open` Float32,
+                `high` Float32,
+                `low` Float32,
+                `close` Float32,
+                `amount` Float64,
+                `vol` Float64,
+                `preclose` Float64,
+                `factor` Float64
+            )
+            ENGINE = MergeTree()
+            ORDER BY (date, code)
+        ", TABLE)
+    } else {
+        format!("
+            CREATE TABLE IF NOT EXISTS {}
+            (
+                `date` Date CODEC(DoubleDelta),
+                `code` FixedString(6),
+                `open` Float32,
+                `high` Float32,
+                `low` Float32,
+                `close` Float32,
+                `amount` Float64,
+                `vol` Float64
+            )
+            ENGINE = MergeTree()
+            ORDER BY (date, code)
+        ", TABLE)
+    }; // PARTITION BY 部分可能需要去掉
     let output = Command::new("clickhouse-client").args(["--query", &create_table]).output()?;
     check_output(output);
     Ok(())
@@ -179,7 +203,7 @@ fn db_setup_clickhouse() -> Result<()> {
 /// clickhouse-client --query "INSERT INTO table FORMAT CSVWithNames" < clickhouse[.csv]
 pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
     use subprocess::{Exec, Redirection};
-    db_setup_clickhouse()?;
+    db_setup_clickhouse(cmd.gbbq.is_some())?;
     run_csv(cmd)?;
     let file = File::open(&cmd.output)?;
     let capture = Exec::cmd("clickhouse-client").args(&["--query", QUERY])
@@ -189,6 +213,29 @@ pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
     assert!(capture.success());
     keep_csv(&cmd.output, cmd.keep_csv)?;
     Ok(())
+}
+
+/// 获取当前最新 factor
+fn clickhouse_factor() -> io::Result<Vec<u8>> {
+    let args =
+        ["--query",
+         &format!("WITH (
+                        SELECT max(date) AS date
+                        FROM {0}
+                        ) AS latest
+                    SELECT
+                        date,
+                        code,
+                        close,
+                        factor
+                    FROM {0}
+                    WHERE latest = date
+                    INTO OUTFILE 'factor.csv'
+                    FORMAT CSVWithNames;",
+                  TABLE)];
+    let output = Command::new("clickhouse-client").args(args).output()?;
+    check_output(output);
+    Ok(fs::read("factor.csv")?)
 }
 
 /// TODO: 与数据库有关的，把库名、表名可配置
@@ -209,18 +256,17 @@ pub fn run_mongodb(cmd: &DayCmd) -> Result<()> {
 }
 
 fn check_output(output: std::process::Output) {
-    std::io::stdout().write_all(&output.stdout).unwrap();
-    std::io::stderr().write_all(&output.stderr).unwrap();
+    io::stdout().write_all(&output.stdout).unwrap();
+    io::stderr().write_all(&output.stderr).unwrap();
     assert!(output.status.success());
 }
 
-fn keep_csv(fname: &str, keep: bool) -> Result<()> {
+fn keep_csv(fname: &str, keep: bool) -> io::Result<()> {
     if keep {
-        std::fs::rename(fname, format!("{}.csv", fname))?;
+        fs::rename(fname, format!("{}.csv", fname))
     } else {
-        std::fs::remove_file(fname)?;
+        fs::remove_file(fname)
     }
-    Ok(())
 }
 
 /// 读取本地 xls(x) 文件
@@ -316,7 +362,7 @@ pub async fn get_sz_stocks(set: Arc<StockList>) -> Result<usize> {
     let (url, ex) = ("http://www.szse.cn/api/report/ShowReport?\
         SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.8587844061443386", "sz");
     let bytes = tokio::spawn(reqwest::get(url).await?.bytes()).await??;
-    let mut workbook = Xlsx::new(std::io::Cursor::new(bytes))?;
+    let mut workbook = Xlsx::new(io::Cursor::new(bytes))?;
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
         set.extend(range.rows().skip(1).map(|r| match &r[4] {
