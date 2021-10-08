@@ -4,4 +4,5 @@ rustdx.log
 rustdx-cmd/rustdx.log
 rustdx-cmd/stocks.csv
 rustdx-cmd/eastmoney.csv
+rustdx-cmd/factor.csv
 

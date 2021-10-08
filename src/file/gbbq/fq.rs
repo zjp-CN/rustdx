@@ -173,6 +173,8 @@ impl Fq {
     fn _0(d: Day, g: &Gbbq, preclose: f64, factor: &mut f64, trading: bool, xdxr: bool) -> Self {
         let [preclose, close, pct] = g.compute_pre_pct(d.close, preclose, xdxr);
         *factor *= pct;
+        println!("d.date: {},factor: {},d.close: {}preclose: {},pct: {}trading: {},xdxr: {}",
+                 d.date, factor, d.close, preclose, pct, trading, xdxr);
         Self { close,
                preclose,
                trading,
