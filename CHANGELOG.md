@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/zjp-CN/rustdx/tree/HEAD)
+## [v0.2.4](https://github.com/zjp-CN/rustdx/tree/v0.2.4) (2021-10-08)
 
-[Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.3...HEAD)
+[Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.3...v0.2.4)
 
 **Implemented enhancements:**
 
