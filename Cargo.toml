@@ -13,7 +13,7 @@ chrono  = {version = "0.4",     optional = true}
 lazy_static = {version = "1",   optional = true}
 miniz_oxide = {version = "0.4", optional = true}
 
-# anyhow    = "1"
+# anyhow = "1"
 thiserror = "1"
 log = {version = "0.4", optional = true}
 
@@ -29,10 +29,10 @@ optional = true
 features = ["fast-gb-hanzi-encode"]
 
 [features]
-default       = ["file"]
-full          = ["file", "tcp", "encoding_rs"]
-tcp           = ["miniz_oxide", "lazy_static", "serde", "log"]
-file          = []
+default = ["file"]
+full    = ["file", "tcp", "encoding_rs"]
+tcp     = ["miniz_oxide", "lazy_static", "serde", "log"]
+file    = []
 
 [dev-dependencies]
 # backtrace 是在 cargo test 无法并行的情况下 用于产生 test name （从而产生 snapshot name ）
