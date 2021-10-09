@@ -54,10 +54,7 @@ pub struct DayCmd {
     #[argh(option, short = 'h')]
     description: Vec<String>,
 
-    // /// 可选。指定数据库（数据集）的名称，默认为 `rustdx`。
-    // #[argh(option, short = 'd', default = "String::from(\"rustdx\")")]
-    // pub database: String,
-    /// 可选。指定表名称，默认为 `tmp`。
+    /// 可选。指定表名称，默认为 `rustdx.tmp`。
     #[argh(option, short = 't', default = "String::from(\"tmp\")")]
     pub table: String,
 }
