@@ -40,7 +40,7 @@ features = ["derive"]
 
 [features]
 default = ["bin"]
-bin = ["rustdx/serde", "tokio/rt",  "tokio/rt-multi-thread", "futures", "argh", "calamine", "lazy_static", "reqwest", "csv", "subprocess", "reqwest/json", "serde", "serde_json", "chrono", "log", "simplelog"]
+bin = ["rustdx/serde", "tokio/rt",  "tokio/rt-multi-thread", "futures", "argh", "calamine", "lazy_static", "reqwest", "csv", "subprocess", "reqwest/json", "serde", "serde_json", "chrono"]
 excel = ["calamine", "reqwest", "tokio/rt",  "tokio/rt-multi-thread", "futures"]
 clickhouse = ["tokio/macros", "tokio/sync", "csv"]
 
