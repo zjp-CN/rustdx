@@ -31,6 +31,10 @@ pub struct East {
     /// 打印响应数据。
     #[argh(switch, short = 's')]
     pub show: bool,
+
+    /// 可选。指定表名称，默认为 `rustdx.tmp`。
+    #[argh(option, short = 't', default = "String::from(\"rustdx.tmp\")")]
+    pub table: String,
 }
 
 impl East {
@@ -84,10 +88,7 @@ impl East {
             println!("text:\n{}\njson:\n{:?}", text, json);
         }
 
-        let previous = crate::io::pre_factor(self.previous
-                                                 .as_ref()
-                                                 .ok_or(anyhow::anyhow!("请检查 previous \
-                                                                         文件的路径"))?)?;
+        let previous = crate::io::previous_csv_table(&self.previous, &self.table)?;
         let file = std::fs::File::create(&self.output)?;
         let mut wrt = csv::Writer::from_writer(file);
         for row in &mut json.data.diff {

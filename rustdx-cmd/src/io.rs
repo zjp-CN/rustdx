@@ -81,11 +81,7 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
     let gbbq = Gbbq::filter_hashmap(Gbbq::iter(&mut bytes[4..]));
 
     // 前收
-    let previous = if let Some(Some(path)) = cmd.previous.as_ref().map(|p| p.to_str()) {
-        if path == "clickhouse" { clickhouse_factor(&cmd.table) } else { pre_factor(dbg!(path)) }?
-    } else {
-        return Err(anyhow!("请检查 gbbq 路径"));
-    };
+    let previous = previous_csv_table(&cmd.previous, &cmd.table)?;
 
     // 股票列表
     let hm = cmd.stocklist();
@@ -141,14 +137,6 @@ fn print(dir: &Path, count: usize, take: usize) {
     } else {
         println!("{:?}\t已完成：{}", dir, count);
     }
-}
-
-/// 读取前收盘价（前 factor ）数据
-pub fn pre_factor(p: impl AsRef<Path>) -> Result<std::collections::HashMap<u32, Factor>> {
-    Ok(csv::Reader::from_reader(File::open(p)?).deserialize::<Factor>()
-                                               .filter_map(|f| f.ok())
-                                               .map(|f| (f.code.parse().unwrap(), f))
-                                               .collect())
 }
 
 fn database_table(table: &str) -> (&str, &str) {
@@ -217,8 +205,30 @@ pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
     Ok(())
 }
 
+type Previous = Result<std::collections::HashMap<u32, Factor>>;
+
+pub fn previous_csv_table(path: &Option<std::path::PathBuf>, table: &str) -> Previous {
+    if let Some(Some(path)) = path.as_ref().map(|p| p.to_str()) {
+        if path == "clickhouse" {
+            clickhouse_factor_csv(table)
+        } else {
+            previous_csv(path)
+        }
+    } else {
+        Err(anyhow!("请检查 gbbq 路径"))
+    }
+}
+
+/// 读取前收盘价（前 factor ）数据
+pub fn previous_csv(p: impl AsRef<Path>) -> Previous {
+    Ok(csv::Reader::from_reader(File::open(p)?).deserialize::<Factor>()
+                                               .filter_map(|f| f.ok())
+                                               .map(|f| (f.code.parse().unwrap(), f))
+                                               .collect())
+}
+
 /// 获取当前最新 factor
-fn clickhouse_factor(table: &str) -> Result<std::collections::HashMap<u32, Factor>> {
+fn clickhouse_factor_csv(table: &str) -> Previous {
     let args =
         ["--query",
          &format!("WITH (
@@ -237,7 +247,7 @@ fn clickhouse_factor(table: &str) -> Result<std::collections::HashMap<u32, Facto
                   table)];
     let output = Command::new("clickhouse-client").args(args).output()?;
     check_output(output);
-    pre_factor("factor.csv")
+    previous_csv("factor.csv")
 }
 
 /// TODO: 与数据库有关的，把库名、表名可配置
