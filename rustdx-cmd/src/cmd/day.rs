@@ -62,11 +62,9 @@ pub struct DayCmd {
 pub type Stocklist = std::collections::HashSet<String>;
 
 impl DayCmd {
-    // pub const A: &'static str = "";
-
     pub fn run(&self) -> Result<()> {
         match self.output.as_str() {
-            "clickhouse" => crate::io::run_clickhouse(self),
+            "clickhouse" => self.run_clickhouse(),
             x if x.ends_with("csv") => self.run_csv(),
             "mongodb" => crate::io::run_mongodb(self),
             _ => todo!(),
@@ -83,6 +81,13 @@ impl DayCmd {
         } else {
             crate::io::run_csv(self)
         }
+    }
+
+    /// clickhouse-client --query "INSERT INTO table FORMAT CSVWithNames" < clickhouse[.csv]
+    pub fn run_clickhouse(&self) -> Result<()> {
+        crate::io::setup_clickhouse(self.gbbq.is_some(), &self.table)?;
+        self.run_csv()?;
+        crate::io::insert_clickhouse(&self.output, &self.table, self.keep_csv)
     }
 
     pub fn help_info(&self) -> &Self {

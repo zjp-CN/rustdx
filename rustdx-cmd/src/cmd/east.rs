@@ -77,8 +77,7 @@ impl East {
                 wrt.serialize(row)?;
             }
         }
-
-        Ok(())
+        self.insert_clickhouse()
     }
 
     pub fn run_previous(&self) -> Result<()> {
@@ -122,8 +121,7 @@ impl East {
                 wrt.serialize(row)?;
             }
         }
-
-        Ok(())
+        self.insert_clickhouse()
     }
 
     pub fn run(&self) -> Result<()> {
@@ -131,6 +129,16 @@ impl East {
             self.run_previous()
         } else {
             self.run_no_previous()
+        }
+    }
+
+    fn insert_clickhouse(&self) -> Result<()> {
+        if self.output.eq("clickhouse") {
+            // 插入 clickhouse 时，不保存解析结果。
+            // 如果需要保存结果，则使用 `rustdx east -o output.csv` 指定 csv 文件。
+            crate::io::insert_clickhouse(&self.output, &self.table, false)
+        } else {
+            Ok(())
         }
     }
 }
