@@ -92,6 +92,6 @@ FORMAT CSVWithNames;
 $ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -o clickhouse
 
 # 有了历史日线数据之后，每个交易日收盘之后，更新当天数据
-$ rustdx east -p clickhouse
+$ rustdx east -p clickhouse -o clickhouse
 ```
 
