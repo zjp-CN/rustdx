@@ -144,7 +144,7 @@ fn database_table(table: &str) -> (&str, &str) {
     table.split_at(pos) // (database_name, table_name)
 }
 
-fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
+pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
     let create_database = format!("CREATE DATABASE IF NOT EXISTS {}", database_table(table).0);
     let output = Command::new("clickhouse-client").args(["--query", &create_database]).output()?;
     check_output(output);
@@ -189,19 +189,15 @@ fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
     Ok(())
 }
 
-/// clickhouse-client --query "INSERT INTO table FORMAT CSVWithNames" < clickhouse[.csv]
-pub fn run_clickhouse(cmd: &DayCmd) -> Result<()> {
+pub fn insert_clickhouse(output: &impl AsRef<Path>, table: &str, keep: bool) -> Result<()> {
     use subprocess::{Exec, Redirection};
-    setup_clickhouse(cmd.gbbq.is_some(), &cmd.table)?;
-    cmd.run_csv()?;
-    let file = File::open(&cmd.output)?;
-    let query = format!("INSERT INTO {} FORMAT CSVWithNames", cmd.table);
+    let query = format!("INSERT INTO {} FORMAT CSVWithNames", table);
     let capture = Exec::cmd("clickhouse-client").args(&["--query", &query])
-                                                .stdin(Redirection::File(file))
+                                                .stdin(Redirection::File(File::open(output)?))
                                                 .capture()?;
     println!("stdout:\n{}stderr:\n{}", capture.stdout_str(), capture.stderr_str());
     assert!(capture.success());
-    keep_csv(&cmd.output, cmd.keep_csv)?;
+    keep_csv(output, keep)?;
     Ok(())
 }
 
@@ -276,9 +272,9 @@ fn check_output(output: std::process::Output) {
     assert!(output.status.success());
 }
 
-fn keep_csv(fname: &str, keep: bool) -> io::Result<()> {
+fn keep_csv(fname: &impl AsRef<Path>, keep: bool) -> io::Result<()> {
     if keep {
-        fs::rename(fname, format!("{}.csv", fname))
+        fs::rename(fname, fname.as_ref().with_extension("csv"))
     } else {
         fs::remove_file(fname)
     }
