@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[argh(subcommand, name = "east")]
 pub struct East {
     /// 保存数据的 CSV 路径文件名。默认为当前路径下 eastmoney.csv 文件。
-    #[argh(option, short = 'j', default = r#""eastmoney.csv".into()"#)]
+    #[argh(option, short = 'o', default = r#""eastmoney.csv".into()"#)]
     pub output: String,
 
     /// 指定前一日复权 csv 文件。
@@ -70,11 +70,13 @@ impl East {
             println!("text:\n{}\njson:\n{:?}", text, json);
         }
 
-        let file = std::fs::File::create(&self.output)?;
-        let mut wrt = csv::Writer::from_writer(file);
-        for row in &json.data.diff {
-            if let F32::Yes(_) = row.close {
-                wrt.serialize(row)?;
+        {
+            let file = std::fs::File::create(&self.output)?;
+            let mut wrt = csv::Writer::from_writer(file);
+            for row in &json.data.diff {
+                if let F32::Yes(_) = row.close {
+                    wrt.serialize(row)?;
+                }
             }
         }
         self.insert_clickhouse()
@@ -82,11 +84,15 @@ impl East {
 
     pub fn run_previous(&self) -> Result<()> {
         let text = crate::io::RUNTIME.block_on(self.get())?;
-        let mut json = Self::json(&text)?;
+        let json = Self::json(&text)?;
         if self.show {
             println!("text:\n{}\njson:\n{:?}", text, json);
         }
+        self._run_previous(json)?;
+        self.insert_clickhouse()
+    }
 
+    fn _run_previous(&self, mut json: EastMarket) -> Result<()> {
         let previous = crate::io::previous_csv_table(&self.previous, &self.table)?;
         let file = std::fs::File::create(&self.output)?;
         let mut wrt = csv::Writer::from_writer(file);
@@ -121,7 +127,7 @@ impl East {
                 wrt.serialize(row)?;
             }
         }
-        self.insert_clickhouse()
+        Ok(())
     }
 
     pub fn run(&self) -> Result<()> {

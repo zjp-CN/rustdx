@@ -201,6 +201,13 @@ pub fn insert_clickhouse(output: &impl AsRef<Path>, table: &str, keep: bool) -> 
     Ok(())
 }
 
+/// 需要日线 clickhouse csv 文件
+#[test]
+fn test_insert_clickhouse() -> Result<()> {
+    setup_clickhouse(true, "rustdx.tmp")?;
+    insert_clickhouse(&"clickhouse", "rustdx.tmp", true)
+}
+
 type Previous = Result<std::collections::HashMap<u32, Factor>>;
 
 pub fn previous_csv_table(path: &Option<std::path::PathBuf>, table: &str) -> Previous {
