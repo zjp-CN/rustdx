@@ -86,7 +86,7 @@ FORMAT CSVWithNames;
 
 ---
 
-或者（尚未发版，请使用 github 源码）：
+或者：
 ```console
 # 解析所有最新股票的历史日线数据，且计算复权数据，写入 ClickHouse 数据库
 $ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -o clickhouse -t rustdx.factor
@@ -95,3 +95,6 @@ $ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -o 
 $ rustdx east -p clickhouse -o clickhouse -t rustdx.factor
 ```
 
+## CHANGELOG
+
+[更新记录](https://github.com/zjp-CN/rustdx/blob/main/CHANGELOG.md)
