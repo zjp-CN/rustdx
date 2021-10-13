@@ -57,12 +57,12 @@ $ cargo build -p rustdx-cmd --release
 
 ```console
 # 解析所有最新股票的历史日线数据，且计算复权数据
-$ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq
+$ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -t rustdx.factor
 # 写入 ClickHouse 数据库
 $ clickhouse-client --query "INSERT INTO rustdx.factor FORMAT CSVWithNames" < stocks.csv
 
 # 有了历史日线数据之后，每个交易日收盘之后，更新当天数据
-$ rustdx east -p factor.csv
+$ rustdx east -p factor.csv -t rustdx.factor
 # 写入 ClickHouse 数据库
 $ clickhouse-client --query "INSERT INTO rustdx.factor FORMAT CSVWithNames" < eastmoney.csv
 ```
@@ -89,9 +89,9 @@ FORMAT CSVWithNames;
 或者（尚未发版，请使用 github 源码）：
 ```console
 # 解析所有最新股票的历史日线数据，且计算复权数据，写入 ClickHouse 数据库
-$ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -o clickhouse
+$ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -o clickhouse -t rustdx.factor
 
 # 有了历史日线数据之后，每个交易日收盘之后，更新当天数据
-$ rustdx east -p clickhouse -o clickhouse
+$ rustdx east -p clickhouse -o clickhouse -t rustdx.factor
 ```
 
