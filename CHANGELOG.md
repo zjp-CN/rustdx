@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased](https://github.com/zjp-CN/rustdx/tree/HEAD)
+
+[Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.4...HEAD)
+
+**Implemented enhancements:**
+
+- 支持 day east -o clickhouse 从而无需导入命令 [\#9](https://github.com/zjp-CN/rustdx/issues/9)
+- 支持 day east -p clickhouse 从而无需手动导出 factor.csv [\#8](https://github.com/zjp-CN/rustdx/issues/8)
+
+**Fixed bugs:**
+
+- 修复 rustdx east Unrecognized argument: -o错误 [\#10](https://github.com/zjp-CN/rustdx/issues/10)
+
 ## [v0.2.4](https://github.com/zjp-CN/rustdx/tree/v0.2.4) (2021-10-08)
 
 [Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.3...v0.2.4)
