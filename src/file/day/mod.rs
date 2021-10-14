@@ -1,6 +1,9 @@
 use std::path::Path;
 
 #[cfg(feature = "serde")]
+use serde::{Serialize, Serializer};
+
+#[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub mod fq;
 
@@ -12,15 +15,37 @@ pub mod fq;
 ///
 /// [`serde_type::Day`]: crate::serde_type::Day
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Day {
+    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_date_string"))]
     pub date:   u32,
+    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_code_string"))]
     pub code:   u32,
     pub open:   f32,
     pub high:   f32,
     pub low:    f32,
     pub close:  f32,
     pub amount: f32,
+    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_vol"))]
     pub vol:    u32,
+}
+
+#[cfg(feature = "serde")]
+fn ser_date_string<S>(date: &u32, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer {
+    serializer.serialize_str(&crate::bytes_helper::date_string(*date))
+}
+
+#[cfg(feature = "serde")]
+fn ser_code_string<S>(code: &u32, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer {
+    serializer.serialize_str(&format!("{:06}", code))
+}
+
+#[cfg(feature = "serde")]
+fn ser_vol<S>(vol: &u32, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer {
+    serializer.serialize_f32(*vol as f32 / 100.)
 }
 
 impl Day {
@@ -58,7 +83,7 @@ impl Day {
     }
 
     /// 一次性以**同步**方式读取单个 `*.day` 文件所有数据，然后转化成 Vec。
-    pub fn file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Day>> {
+    pub fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Day>> {
         Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
     }
 
@@ -70,21 +95,21 @@ impl Day {
     //         .collect())
     // }
 
-    /// 转化成用于（反）序列化的数据类型：
-    /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
-    #[cfg(feature = "serde")]
-    pub fn into_serde_type(self) -> crate::serde_type::Day {
-        crate::serde_type::Day { code:   format!("{:06}", self.code),
-                                 date:   self.date_string(),
-                                 open:   self.open,
-                                 high:   self.high,
-                                 low:    self.low,
-                                 close:  self.close,
-                                 // 单位：元
-                                 amount: self.amount,
-                                 // 转换成手：方便与其他数据源汇合
-                                 vol:    self.vol as f32 / 100., }
-    }
+    // /// 转化成用于（反）序列化的数据类型：
+    // /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
+    // #[cfg(feature = "serde")]
+    // pub fn into_serde_type(self) -> crate::serde_type::Day {
+    //     crate::serde_type::Day { code:   format!("{:06}", self.code),
+    //                              date:   self.date_string(),
+    //                              open:   self.open,
+    //                              high:   self.high,
+    //                              low:    self.low,
+    //                              close:  self.close,
+    //                              // 单位：元
+    //                              amount: self.amount,
+    //                              // 转换成手：方便与其他数据源汇合
+    //                              vol:    self.vol as f32 / 100., }
+    // }
 
     /// `%Y-%m-%d` 格式的日期
     pub fn date_string(&self) -> String { crate::bytes_helper::date_string(self.date) }

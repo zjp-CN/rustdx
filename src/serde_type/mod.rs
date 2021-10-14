@@ -1,6 +1,3 @@
-mod day;
-pub use day::*;
-
 mod lc;
 pub use lc::*;
 
