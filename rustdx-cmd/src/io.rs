@@ -31,7 +31,7 @@ pub fn run_csv(cmd: &DayCmd) -> Result<()> {
                          .filter_map(|((_, code), src)| {
                              count += 1;
                              println!("#{:06}# {:?}", code, src);
-                             rustdx::serde_type::Day::from_file_into_vec(code, src).ok()
+                             rustdx::file::day::Day::from_file_into_vec(code, src).ok()
                          })
                          .flatten()
                          .try_for_each(|t| wtr.serialize(t))?;

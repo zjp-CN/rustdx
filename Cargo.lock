@@ -1137,6 +1137,7 @@ name = "rustdx"
 version = "0.2.4"
 dependencies = [
  "chrono",
+ "csv",
  "encoding_rs",
  "insta",
  "lazy_static",
