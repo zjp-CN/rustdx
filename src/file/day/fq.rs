@@ -1,9 +1,13 @@
-use crate::file::gbbq::{Factor, Fq, Gbbq};
-use crate::{Error::Custom, Result};
+use crate::{
+    file::gbbq::{Factor, Fq, Gbbq},
+    Error::Custom,
+    Result,
+};
 use std::path::Path;
 
 /// 注意：成交量的单位为 “手”，而不是股。在通达信和交易所数据里，单位为股。
-#[derive(Debug, Clone, serde::Serialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Day {
     pub date:     String,
     pub code:     String,
