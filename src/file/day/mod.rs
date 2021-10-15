@@ -1,7 +1,10 @@
 use std::path::Path;
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Serializer};
+use {
+    crate::bytes_helper::{ser_code_string, ser_date_string},
+    serde::{Serialize, Serializer},
+};
 
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -28,18 +31,6 @@ pub struct Day {
     pub amount: f32,
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_vol"))]
     pub vol:    u32,
-}
-
-#[cfg(feature = "serde")]
-fn ser_date_string<S>(date: &u32, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer {
-    serializer.serialize_str(&crate::bytes_helper::date_string(*date))
-}
-
-#[cfg(feature = "serde")]
-fn ser_code_string<S>(code: &u32, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer {
-    serializer.serialize_str(&format!("{:06}", code))
 }
 
 #[cfg(feature = "serde")]

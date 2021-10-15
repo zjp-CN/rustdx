@@ -9,11 +9,13 @@ use std::collections::HashMap;
 pub type StockGbbq<'a> = HashMap<u32, Vec<Gbbq<'a>>>;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Gbbq<'a> {
     pub market:   u8,
     /// 6 位股票代码
     pub code:     &'a str,
     /// 日期
+    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_date_string"))]
     pub date:     u32,
     /// 信息类型
     ///
@@ -98,17 +100,17 @@ impl<'a> Gbbq<'a> {
     //     Ok(bytes)
     // }
 
-    #[cfg(feature = "serde")]
-    pub fn into_serde_type(self) -> crate::serde_type::Gbbq {
-        crate::serde_type::Gbbq { sh:       self.market,
-                                  code:     self.code.into(),
-                                  date:     date_string(self.date),
-                                  category: self.category,
-                                  fh_qltp:  self.fh_qltp,
-                                  pgj_qzgb: self.pgj_qzgb,
-                                  sg_hltp:  self.sg_hltp,
-                                  pg_hzgb:  self.pg_hzgb, }
-    }
+    // #[cfg(feature = "serde")]
+    // pub fn into_serde_type(self) -> crate::serde_type::Gbbq {
+    //     crate::serde_type::Gbbq { sh:       self.market,
+    //                               code:     self.code.into(),
+    //                               date:     date_string(self.date),
+    //                               category: self.category,
+    //                               fh_qltp:  self.fh_qltp,
+    //                               pgj_qzgb: self.pgj_qzgb,
+    //                               sg_hltp:  self.sg_hltp,
+    //                               pg_hzgb:  self.pg_hzgb, }
+    // }
 
     #[inline]
     pub fn compute_pre_pct(&self, close: f32, mut preclose: f64, flag: bool) -> [f64; 3] {

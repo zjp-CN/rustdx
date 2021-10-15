@@ -9,10 +9,6 @@ pub mod bytes_helper;
 #[cfg_attr(docsrs, doc(cfg(feature = "file")))]
 pub mod file;
 
-#[cfg(feature = "serde")]
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-pub mod serde_type;
-
 #[cfg(feature = "tcp")]
 #[cfg_attr(docsrs, doc(cfg(feature = "tcp")))]
 pub mod tcp;

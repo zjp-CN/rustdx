@@ -105,11 +105,11 @@ impl Lc {
     }
 }
 
-/// 用于（反）序列化：比如读取或写入到 csv
+/// 用于序列化：比如写入到 csv
 ///
 /// 此结构体暂时待定，未来可能更改。
 #[cfg(feature = "serde")]
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct LcSerde {
     /// `date` 为 `%Y-%m-%d H:M` 文本格式
     pub datetime: String,
