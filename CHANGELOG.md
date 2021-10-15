@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/zjp-CN/rustdx/tree/HEAD)
+
+[Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.4.beta1...HEAD)
+
+**Closed issues:**
+
+- `file::day::fq::Day` 文档：单位“笔”改为“股” [\#14](https://github.com/zjp-CN/rustdx/issues/14)
+
 ## [v0.2.4.beta1](https://github.com/zjp-CN/rustdx/tree/v0.2.4.beta1) (2021-10-13)
 
 [Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.4...v0.2.4.beta1)
