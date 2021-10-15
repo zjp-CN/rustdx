@@ -6,8 +6,6 @@ use {
     serde::{Serialize, Serializer},
 };
 
-#[cfg(feature = "serde")]
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub mod fq;
 
 /// 解析 `*.day` 文件中的一条日线数据，即其 32 个字节所代表的所有信息。
