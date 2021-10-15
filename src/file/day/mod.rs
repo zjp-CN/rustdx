@@ -12,9 +12,11 @@ pub mod fq;
 ///
 /// 注意：这个类型只对 `*.day` 文件进行了初步解析，
 /// 所以日期 `date` 和股票代码 `code` 都是 `u32` 类型，
-/// 如果的确需要这两个字段为字符串类型，考虑使用 [`serde_type::Day`] 类型。
 ///
-/// [`serde_type::Day`]: crate::serde_type::Day
+/// ## 注意
+/// 开启 `serde` feature 时，此结构体的序列化 (serialize) 时：
+/// 1. `date` 为 `年-月-日` 格式
+/// 2. `code` 为 6 位字符串的股票代码
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Day {
@@ -75,30 +77,6 @@ impl Day {
     pub fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Day>> {
         Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
     }
-
-    // #[cfg(feature="tokio")]
-    // pub async fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> Result<Vec<Day>, Error>
-    // {     Ok(tokio::fs::read(p).await.map_err(|_| Error::FileNotFound)?
-    //         .chunks_exact(32)
-    //         .map(|b| Self::from_bytes(code, b))
-    //         .collect())
-    // }
-
-    // /// 转化成用于（反）序列化的数据类型：
-    // /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
-    // #[cfg(feature = "serde")]
-    // pub fn into_serde_type(self) -> crate::serde_type::Day {
-    //     crate::serde_type::Day { code:   format!("{:06}", self.code),
-    //                              date:   self.date_string(),
-    //                              open:   self.open,
-    //                              high:   self.high,
-    //                              low:    self.low,
-    //                              close:  self.close,
-    //                              // 单位：元
-    //                              amount: self.amount,
-    //                              // 转换成手：方便与其他数据源汇合
-    //                              vol:    self.vol as f32 / 100., }
-    // }
 
     /// `%Y-%m-%d` 格式的日期
     pub fn date_string(&self) -> String { crate::bytes_helper::date_string(self.date) }
