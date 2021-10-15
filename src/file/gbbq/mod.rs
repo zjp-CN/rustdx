@@ -8,6 +8,11 @@ use crate::{bytes_helper::*, Result};
 use std::collections::HashMap;
 pub type StockGbbq<'a> = HashMap<u32, Vec<Gbbq<'a>>>;
 
+/// 股本变迁 (gbbq) 文件。
+///
+/// ## 注意
+/// 开启 `serde` feature 时，此结构体的序列化 (serialize) 时：
+/// `date` 为 `年-月-日` 格式。
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Gbbq<'a> {
@@ -65,18 +70,6 @@ impl<'a> Gbbq<'a> {
                pg_hzgb:  f32_from_le_bytes(chunk, 25), }
     }
 
-    // #[inline]
-    // pub fn from_chunk_mut(chunk: &'a mut [u8]) -> Gbbq {
-    //     Self { sh:       u8_from_le_bytes(chunk, 0),
-    //            code:     unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) },
-    //            date:     u32_from_le_bytes(chunk, 8),
-    //            category: u8_from_le_bytes(chunk, 12),
-    //            fh_qltp:  f32_from_le_bytes(chunk, 13),
-    //            pgj_qzgb: f32_from_le_bytes(chunk, 17),
-    //            sg_hltp:  f32_from_le_bytes(chunk, 21),
-    //            pg_hzgb:  f32_from_le_bytes(chunk, 25), }
-    // }
-
     // 未解密二进制数据转化成 [`Gbbq`]
     pub fn iter(bytes: &mut [u8]) -> impl Iterator<Item = Gbbq> {
         bytes.chunks_exact_mut(29).map(parse).map(Gbbq::from_chunk)
@@ -87,30 +80,6 @@ impl<'a> Gbbq<'a> {
     pub fn iter_deciphered(bytes: &'a [u8]) -> impl Iterator<Item = Gbbq> {
         bytes.chunks_exact(29).map(Self::from_chunk)
     }
-
-    // /// 读取，解密并写入股本变迁的数据到 csv 。
-    // /// 如果写入成功，则返回解密后二进制数据（包括表示长度的前 4 字节）
-    // #[cfg(feature = "csv")]
-    // #[cfg(feature = "tokio")]
-    // pub async fn from_file_into_csv(src: impl AsRef<Path>, dst: impl AsRef<Path>)
-    //                                 -> io::Result<Vec<u8>, Box<dyn std::error::Error>> {
-    //     let mut bytes = std::fs::read(src)?;
-    //     let mut wtr = csv::Writer::from_path(dst)?;
-    //     Self::iter(&mut bytes[4..]).try_for_each(|gbbq| wtr.serialize(gbbq.into_serde_type()))?;
-    //     Ok(bytes)
-    // }
-
-    // #[cfg(feature = "serde")]
-    // pub fn into_serde_type(self) -> crate::serde_type::Gbbq {
-    //     crate::serde_type::Gbbq { sh:       self.market,
-    //                               code:     self.code.into(),
-    //                               date:     date_string(self.date),
-    //                               category: self.category,
-    //                               fh_qltp:  self.fh_qltp,
-    //                               pgj_qzgb: self.pgj_qzgb,
-    //                               sg_hltp:  self.sg_hltp,
-    //                               pg_hzgb:  self.pg_hzgb, }
-    // }
 
     #[inline]
     pub fn compute_pre_pct(&self, close: f32, mut preclose: f64, flag: bool) -> [f64; 3] {

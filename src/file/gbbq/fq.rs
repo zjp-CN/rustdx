@@ -1,12 +1,12 @@
 use super::Gbbq;
 use crate::file::day::Day;
 
-#[cfg(feature = "serde")]
-#[derive(Debug, Clone, serde::Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct Factor {
     pub date:     String,
     pub code:     String,
-    #[serde(rename(deserialize = "close"))]
+    #[cfg_attr(feature = "serde", serde(rename(deserialize = "close")))]
     pub preclose: f64,
     pub factor:   f64,
 }
