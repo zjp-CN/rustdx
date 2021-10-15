@@ -6,7 +6,6 @@ use anyhow::Result;
 fn main() -> Result<()> {
     // log_init()?;
     let cmd: cmd::TopLevel = argh::from_env();
-    // println!("{:?}", cmd);
     cmd.match_subcmd()
 }
 
