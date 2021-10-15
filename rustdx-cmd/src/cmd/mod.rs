@@ -15,6 +15,10 @@ pub use official::*;
 pub struct TopLevel {
     #[argh(subcommand)]
     sub: SubCommand,
+
+    /// 可选。打印 TopLevel（及子命令） 结构体。比如 `rustdx -p day`。
+    #[argh(switch, short = 'p', long = "print-struct")]
+    pub print_struct: bool,
 }
 
 #[derive(FromArgs, PartialEq, Debug)]
@@ -28,6 +32,9 @@ pub enum SubCommand {
 impl TopLevel {
     pub fn match_subcmd(&self) -> Result<()> {
         use SubCommand::*;
+        if self.print_struct {
+            println!("{:#?}", self);
+        }
         match self.sub {
             Day(ref cmd) => cmd.help_info().run(),
             Official(ref cmd) => cmd.run(),
