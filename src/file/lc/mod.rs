@@ -63,15 +63,15 @@ impl Lc {
     /// 转化成用于（反）序列化的数据类型：
     /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
     #[cfg(feature = "serde")]
-    pub fn into_serde_type(self) -> crate::serde_type::Lc {
-        crate::serde_type::Lc { datetime: self.datetime_string(),
-                                code:     format!("{:06}", self.code),
-                                open:     self.open,
-                                high:     self.high,
-                                low:      self.low,
-                                close:    self.close,
-                                amount:   self.amount as f64,
-                                vol:      self.vol as u64, }
+    pub fn into_serde_type(self) -> LcSerde {
+        LcSerde { datetime: self.datetime_string(),
+                  code:     format!("{:06}", self.code),
+                  open:     self.open,
+                  high:     self.high,
+                  low:      self.low,
+                  close:    self.close,
+                  amount:   self.amount,
+                  vol:      self.vol, }
     }
 
     pub fn datetime_string(&self) -> String {
@@ -103,4 +103,21 @@ impl Lc {
         chrono::naive::NaiveDate::from_ymd(y as i32, m as u32, d as u32).and_hms(h as u32,
                                                                                  min as u32, 0)
     }
+}
+
+/// 用于（反）序列化：比如读取或写入到 csv
+///
+/// 此结构体暂时待定，未来可能更改。
+#[cfg(feature = "serde")]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct LcSerde {
+    /// `date` 为 `%Y-%m-%d H:M` 文本格式
+    pub datetime: String,
+    pub code:     String,
+    pub open:     f32,
+    pub high:     f32,
+    pub low:      f32,
+    pub close:    f32,
+    pub amount:   f32,
+    pub vol:      u32,
 }
