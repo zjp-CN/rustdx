@@ -1,12 +1,9 @@
 use std::path::Path;
 
-/// 解析 `*.day` 文件中的一条日线数据，即其 32 个字节所代表的所有信息。
+/// 解析 `*.lc` 文件中的一条日线数据，即其 32 个字节所代表的所有信息。
 ///
-/// 注意：这个类型只对 `*.day` 文件进行了初步解析，
+/// 注意：这个类型只对 `*.lc` 文件进行了初步解析，
 /// 所以日期 `date` 和股票代码 `code` 都是 `u32` 类型，
-/// 如果的确需要这两个字段为字符串类型，考虑使用 [`serde_type::Lc`] 类型。
-///
-/// [`serde_type::Lc`]: crate::serde_type::Lc
 #[derive(Debug, Clone, Copy)]
 pub struct Lc {
     pub date:   u16,
@@ -21,7 +18,7 @@ pub struct Lc {
 }
 
 impl Lc {
-    /// 从 `*.day` 文件中获取数据，该文件中，每 32 个字节存储了一根日线数据，
+    /// 从 `*.lc` 文件中获取数据，该文件中，每 32 个字节存储了一根分钟 K 线数据，
     /// 各字节存储数据如下：
     ///
     /// | 字节位置     | 含义         | 解析方式 | 额外处理 |
@@ -58,7 +55,7 @@ impl Lc {
                code }
     }
 
-    /// 一次性以**同步**方式读取单个 `*.day` 文件所有数据，然后转化成 Vec。
+    /// 一次性以**同步**方式读取单个 `*.lc` 文件所有数据，然后转化成 Vec。
     pub fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Lc>> {
         Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
     }
