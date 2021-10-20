@@ -18,7 +18,7 @@
 
 命令行工具（统计数据基于笔者的单核 CPU Ubuntu 系统 release build，以实际速度为准）：
 1. 解析所有最新股票列表的历史 A 股数据（包含复权数据）不到 30s ，解析后的 csv 大小 1G 多；
-2. 子命令直接将解析后的 csv 数据插入到 ClickHouse （20s，表 268 M） 或 MongoDB （7 分钟，表超过 700 M）；
+2. 将解析后的 csv 数据插入到 ClickHouse （20s，表 268 M） 或 MongoDB （7 分钟，表超过 700 M）；
 3. 东财日线增量更新（包括复权），2s 更新完。
 
 关于复权：
@@ -50,7 +50,7 @@ $ cargo build -p rustdx-cmd --release
 ### 子命令
 
 - day：解析通达信 day 文件，具体查看帮助 `rustdx day --help`、`rustdx day -h o -h l`。
-- east：获取东方财富当日 A 股数据。
+- east：获取东方财富当日 A 股数据，具体查看帮助 `rustdx east --help`。
 
 ### 完整使用例子
 
