@@ -205,5 +205,7 @@ const DAYCMD_OUTPUT: &'static str = "--output 或 -o ：
 1. 成功插入到 clickhouse 或 mongodb 数据库之后，默认会删除掉解析的 stocks.csv 文件。
    如果需要保存这个文件，使用 `-k` 参数：`-o clickhouse -k` 或 `-o mongodb -k`。
 2. clickhouse 数据库必须先建表再插入数据，因此本工具会提前建表。
-3. 复权数据暂不支持 `-o clickhouse`。也就是说，目前不支持 `-g xx -p xx` 和 `-o clickhouse` 并存。 
+3. 支持 `-g xx [-p xx]` 和 `-o clickhouse` 并存。即 
+   `rustdx day day_file_path -o clickhouse -g gbbq_path [-p csv_path]`
+   表示解析并插入复权数据到 clickhouse。
 ";
