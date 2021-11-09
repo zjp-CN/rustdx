@@ -56,6 +56,8 @@ $ cargo build -p rustdx-cmd --release
 
 准备好 day 文件、gbbq 文件和 ClickHouse 数据库：
 
+p.s. 请勿使用本项目 `assets/` 中的 gbbq 文件，因为那对你来说是过时的。
+
 ```console
 # 解析所有最新股票的历史日线数据，且计算复权数据
 $ rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq -t rustdx.factor
