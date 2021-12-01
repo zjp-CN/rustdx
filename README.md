@@ -72,17 +72,13 @@ $ clickhouse-client --query "INSERT INTO rustdx.factor FORMAT CSVWithNames" < ea
 
 其中 factor.csv 来自数据库中，前一天的复权数据，ClickHouse 的导出命令：
 ```sql
-WITH (
-        SELECT max(date) AS date
-        FROM rustdx.factor
-    ) AS latest
 SELECT
-    date,
+    yesterday() AS date,
     code,
-    close,
-    factor
+    last_value(close),
+    last_value(factor)
 FROM rustdx.factor
-WHERE latest = date
+GROUP BY code
 INTO OUTFILE 'factor.csv'
 FORMAT CSVWithNames;
 ```
