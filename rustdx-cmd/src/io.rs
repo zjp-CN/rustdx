@@ -234,17 +234,13 @@ pub fn previous_csv(p: impl AsRef<Path>) -> Previous {
 fn clickhouse_factor_csv(table: &str) -> Previous {
     let args =
         ["--query",
-         &format!("WITH (
-                        SELECT max(date) AS date
-                        FROM {0}
-                        ) AS latest
-                    SELECT
-                        date,
-                        code,
-                        close,
-                        factor
+         &format!("SELECT
+                     yesterday() AS date,
+                     code,
+                     last_value(close),
+                     last_value(factor)
                     FROM {0}
-                    WHERE latest = date
+                    GROUP BY code
                     INTO OUTFILE 'factor.csv'
                     FORMAT CSVWithNames;",
                   table)];
