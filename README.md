@@ -75,8 +75,8 @@ $ clickhouse-client --query "INSERT INTO rustdx.factor FORMAT CSVWithNames" < ea
 SELECT
     yesterday() AS date,
     code,
-    last_value(close),
-    last_value(factor)
+    last_value(close) AS close,
+    last_value(factor) AS factor
 FROM rustdx.factor
 GROUP BY code
 INTO OUTFILE 'factor.csv'
