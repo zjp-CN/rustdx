@@ -10,11 +10,17 @@ pub use east::*;
 mod official;
 pub use official::*;
 
+const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION"));
+
 #[derive(FromArgs, PartialEq, Debug)]
 /// rustdx
 pub struct TopLevel {
     #[argh(subcommand)]
     sub: SubCommand,
+
+    /// 版本号。
+    #[argh(switch, short = 'v')]
+    version: bool,
 
     /// 可选。打印 TopLevel（及子命令） 结构体。比如 `rustdx -p day`。
     #[argh(switch, short = 'p', long = "print-struct")]
@@ -34,6 +40,10 @@ impl TopLevel {
         use SubCommand::*;
         if self.print_struct {
             println!("{:#?}", self);
+        }
+        if self.version {
+            println!("{}", VERSION);
+            std::process::exit(0);
         }
         match self.sub {
             Day(ref cmd) => cmd.help_info().run(),
