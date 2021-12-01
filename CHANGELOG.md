@@ -1,12 +1,25 @@
 # Changelog
 
-## [Unreleased](https://github.com/zjp-CN/rustdx/tree/HEAD)
+## [bin-v0.1.4](https://github.com/zjp-CN/rustdx/tree/bin-v0.1.4) (2021-12-01)
 
-[Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.4.beta1...HEAD)
+[Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.4.beta1...bin-v0.1.4)
+
+**Implemented enhancements:**
+
+- 增加版本参数 -v [\#18](https://github.com/zjp-CN/rustdx/issues/18)
+- rustdx 命令默认不打印 TopLevel 结构体 [\#13](https://github.com/zjp-CN/rustdx/issues/13)
+
+**Fixed bugs:**
+
+- 停牌结束后复权因子错误 [\#17](https://github.com/zjp-CN/rustdx/issues/17)
 
 **Closed issues:**
 
+- `rustdx day -h o` 删除过时的帮助信息 [\#16](https://github.com/zjp-CN/rustdx/issues/16)
+- Xdxr 内部小重构 [\#15](https://github.com/zjp-CN/rustdx/issues/15)
 - `file::day::fq::Day` 文档：单位“笔”改为“股” [\#14](https://github.com/zjp-CN/rustdx/issues/14)
+- 删除 serde\_type 模块，利用 `cfg_attr` 设置 serde 相关内容 [\#12](https://github.com/zjp-CN/rustdx/issues/12)
+- 修正 lc 文档 [\#11](https://github.com/zjp-CN/rustdx/issues/11)
 
 ## [v0.2.4.beta1](https://github.com/zjp-CN/rustdx/tree/v0.2.4.beta1) (2021-10-13)
 
