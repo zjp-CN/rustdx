@@ -1,8 +1,9 @@
 [package]
 name        = "rustdx-cmd"
-version     = "0.1.3"
+version     = "0.1.4"
 edition     = "2018"
 license     = "MIT"
+build       = "build.rs"
 readme      = "../README.md"
 description = "受 pytdx 启发的 A 股数据获取库"
 repository  = "https://github.com/zjp-CN/rustdx"
