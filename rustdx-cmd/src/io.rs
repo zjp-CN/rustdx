@@ -237,8 +237,8 @@ fn clickhouse_factor_csv(table: &str) -> Previous {
          &format!("SELECT
                      yesterday() AS date,
                      code,
-                     last_value(close),
-                     last_value(factor)
+                     last_value(close) AS close,
+                     last_value(factor) AS factor
                     FROM {0}
                     GROUP BY code
                     INTO OUTFILE 'factor.csv'
