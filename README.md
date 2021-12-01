@@ -37,7 +37,7 @@
 
 2. cargo install：
 ```console
-$ CARGO_PROFILE_RELEASE_LTO=true CARGO_PROFILE_RELEASE_OPT_LEVEL=3 cargo install rustdx-cmd
+$ CARGO_PROFILE_RELEASE_LTO=yes CARGO_PROFILE_RELEASE_OPT_LEVEL=3 cargo install rustdx-cmd
 ```
 
 3. cargo build：
