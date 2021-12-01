@@ -33,6 +33,8 @@ miniz_oxide = {version ="0.4", optional = true}
 version  = "0.2.4"
 optional = true
 path = "../"
+default-features = false
+features = ["serde", "file"]
 
 [dependencies.serde]
 version  = "1"
@@ -41,7 +43,7 @@ features = ["derive"]
 
 [features]
 default = ["bin"]
-bin = ["rustdx/serde", "tokio/rt",  "tokio/rt-multi-thread", "futures", "argh", "calamine", "lazy_static", "reqwest", "csv", "subprocess", "reqwest/json", "serde", "serde_json", "chrono"]
+bin = ["rustdx", "tokio/rt",  "tokio/rt-multi-thread", "futures", "argh", "calamine", "lazy_static", "reqwest", "csv", "subprocess", "reqwest/json", "serde", "serde_json", "chrono"]
 excel = ["calamine", "reqwest", "tokio/rt",  "tokio/rt-multi-thread", "futures"]
 clickhouse = ["tokio/macros", "tokio/sync", "csv"]
 
