@@ -58,8 +58,19 @@ $ cargo build -p rustdx-cmd --release
 
 p.s. 请勿使用本项目 `assets/` 中的 gbbq 文件，因为那对你来说是过时的。
 
+> 注意：
+>
 > 因为没有每天记录日线导致日线不完整（或者其他原因导致数据有问题），请**重新**解析和存储所有历史数据。
-> 此工具的主要目的就是快速补齐历史日线数据。
+>
+> 此工具的主要目的就是快速补齐历史日线数据，但没有任何清空数据库的功能。
+>
+> 所以重新存储数据之前，使用以下 sql 命令（以 ClickHouse 为例）删除历史数据。
+>
+> ```sql
+> TRUNCATE TABLE rustdx.factor;
+> ```
+>
+> 如果发现历史数据不正确，请提交 [issue](https://github.com/zjp-CN/rustdx/issues)。
 
 ```console
 # 解析所有最新股票的历史日线数据，且计算复权数据
