@@ -322,15 +322,15 @@ impl StockList {
     pub fn into_inner(self) -> Stocklist { self.0.into_inner().unwrap() }
 }
 
-/// sh8: 334
-/// ["sh688001", "sh688002", ..., "sh688981", "sh689009"]
-/// sh1: 1639
-/// ["sh600000", "sh600004", ..., "sh605588", "sh605589"]
-/// sz: 2488
-/// ["sz000001", "sz000002", ..., "sz301053", "sz301055"]
+// 股票上限
+const SH8: &str = "500";
+const SH1: &str = "1800";
+
+/// sh8, sh1, sz: 407, 1665, 2618 => 4690
+/// 此数据可运行 `test_get_offical_stocks` 得知
 pub async fn offical_stocks(set: Arc<StockList>) -> Result<usize> {
-    let len = futures::try_join!(get_sh_stocks(set.clone(), "8", "400"),
-                                 get_sh_stocks(set.clone(), "1", "1700"),
+    let len = futures::try_join!(get_sh_stocks(set.clone(), "8", SH8),
+                                 get_sh_stocks(set.clone(), "1", SH1),
                                  get_sz_stocks(set.clone()))?;
     dbg!(len);
     let len = len.0 + len.1 + len.2;
@@ -345,9 +345,8 @@ pub fn get_offical_stocks(cond: &str) -> Option<Stocklist> {
                              "official" => offical_stocks(set.clone()).await,
                              "szse" => get_sz_stocks(set.clone()).await,
                              "sse" => {
-                                 let l =
-                                     futures::try_join!(get_sh_stocks(set.clone(), "8", "400"),
-                                                        get_sh_stocks(set.clone(), "1", "1700"),)?;
+                                 let l = futures::try_join!(get_sh_stocks(set.clone(), "8", SH8),
+                                                            get_sh_stocks(set.clone(), "1", SH1),)?;
                                  Ok(l.0 + l.1)
                              }
                              _ => unreachable!(),
@@ -373,8 +372,11 @@ fn test_get_offical_stocks() -> Result<()> {
 /// 深交所官网的 A 股和创业板股票信息。
 pub async fn get_sz_stocks(set: Arc<StockList>) -> Result<usize> {
     use calamine::{DataType, Reader, Xlsx};
-    let (url, ex) = ("http://www.szse.cn/api/report/ShowReport?\
-        SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.8587844061443386", "sz");
+    let (url, ex) = (
+        "http://www.szse.cn/api/report/ShowReport?\
+        SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.8587844061443386",
+        "sz",
+    );
     let bytes = tokio::spawn(reqwest::get(url).await?.bytes()).await??;
     let mut workbook = Xlsx::new(io::Cursor::new(bytes))?;
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
@@ -397,10 +399,13 @@ pub async fn get_sz_stocks(set: Arc<StockList>) -> Result<usize> {
 ///        A 股 60 开头（目前 1650 只，只需一次请求） => stockType=1, pagesize=1700
 pub async fn get_sh_stocks(set: Arc<StockList>, stocktype: &str, pagesize: &str) -> Result<usize> {
     let client = reqwest::Client::new();
-    let url = format!("http://query.sse.com.cn/security/stock/getStockListData\
+    let url = format!(
+        "http://query.sse.com.cn/security/stock/getStockListData\
           .do?&jsonCallBack=jsonpCallback72491&isPagination=true&stockCode=&csrcCode=&areaName=\
           &stockType={}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={}\
-          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678", stocktype, pagesize);
+          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678",
+        stocktype, pagesize
+    );
     let text =
         tokio::spawn(client.get(url).headers(HEADER_SSE.to_owned()).send().await?.text()).await??;
     let pos1 = text.find("total\":").ok_or(anyhow!("`Total` field not found"))? + 7;
