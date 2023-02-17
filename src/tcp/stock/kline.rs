@@ -57,7 +57,7 @@ impl<'d> Kline<'d> {
                    let mut arr = [0; Self::LEN];
                    arr.copy_from_slice(Self::SEND);
                    arr[12..14].copy_from_slice(&market.to_le_bytes());
-                   arr[14..20].copy_from_slice(&code.as_bytes());
+                   arr[14..20].copy_from_slice(code.as_bytes());
                    arr[20..22].copy_from_slice(&category.to_le_bytes());
                    arr[24..26].copy_from_slice(&start.to_le_bytes());
                    arr[26..28].copy_from_slice(&count.to_le_bytes());
@@ -80,7 +80,7 @@ impl<'d> Kline<'d> {
     /// 当 code 的字节长度不是 6 时，程序会 panic。
     pub fn code(&mut self, code: &'d str) -> &mut Self {
         self.code = code;
-        self.send[14..20].copy_from_slice(&code.as_bytes());
+        self.send[14..20].copy_from_slice(code.as_bytes());
         self
     }
 

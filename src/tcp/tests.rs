@@ -25,6 +25,6 @@ pub fn connection_mut<T: Tdx>(tdx: &mut T) -> Result<()>
     where <T as Tdx>::Item: std::fmt::Debug {
     println!("send: {:?}", tdx.send());
     let res = tdx.recv_parsed(&mut Tcp::new()?)?;
-    println!("recv: {:?}", res);
+    println!("recv: {res:?}");
     Ok(())
 }

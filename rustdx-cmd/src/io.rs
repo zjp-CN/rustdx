@@ -21,16 +21,16 @@ pub fn run_csv(cmd: &DayCmd) -> Result<()> {
     let mut wtr = csv::WriterBuilder::new().buffer_capacity(BUFFER_SIZE).from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
-        println!("dir: {:?} day 文件数量：{}", dir, n);
+        println!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
         filter_file(dir)?.map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
-                         .filter(|((b, _), s)| filter(*b, &s, hm.as_ref(), dir).unwrap_or(false))
+                         .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
                          .take(take)
                          .filter_map(|((_, code), src)| {
                              count += 1;
-                             println!("#{:06}# {:?}", code, src);
+                             println!("#{code:06}# {src:?}");
                              rustdx::file::day::Day::from_file_into_vec(code, src).ok()
                          })
                          .flatten()
@@ -54,16 +54,16 @@ pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
     let mut wtr = csv::WriterBuilder::new().buffer_capacity(BUFFER_SIZE).from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
-        println!("dir: {:?} day 文件数量：{}", dir, n);
+        println!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
         filter_file(dir)?.map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
-                         .filter(|((b, _), s)| filter(*b, &s, hm.as_ref(), dir).unwrap_or(false))
+                         .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
                          .take(take)
                          .filter_map(|((_, code), src)| {
                              count += 1;
-                             println!("#{:06}# {:?}", code, src);
+                             println!("#{code:06}# {src:?}");
                              Day::new(code, src, gbbq.get(&code).map(Vec::as_slice)).ok()
                          })
                          .flatten()
@@ -90,16 +90,16 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
     let mut wtr = csv::WriterBuilder::new().buffer_capacity(BUFFER_SIZE).from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
-        println!("dir: {:?} day 文件数量：{}", dir, n);
+        println!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
         filter_file(dir)?.map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
-                         .filter(|((b, _), s)| filter(*b, &s, hm.as_ref(), dir).unwrap_or(false))
+                         .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
                          .take(take)
                          .filter_map(|((_, code), src)| {
                              count += 1;
-                             println!("#{:06}# {:?}", code, src);
+                             println!("#{code:06}# {src:?}");
                              Day::concat(code,
                                          src,
                                          // 无分红数据并不意味着无复权数据
@@ -131,11 +131,11 @@ fn filter(b: bool, src: &Path, hm: Option<&Stocklist>, dir: &Path) -> Option<boo
 
 fn print(dir: &Path, count: usize, take: usize) {
     if count == 0 && take != 0 {
-        println!("{:?} 目录下无 `.day` 文件符合要求", dir);
+        println!("{dir:?} 目录下无 `.day` 文件符合要求");
     } else if take == 0 {
         println!("请输入大于 0 的文件数量");
     } else {
-        println!("{:?}\t已完成：{}", dir, count);
+        println!("{dir:?}\t已完成：{count}");
     }
 }
 
@@ -151,7 +151,7 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
     #[rustfmt::skip]
     let create_table = if fq {
         format!("
-            CREATE TABLE IF NOT EXISTS {}
+            CREATE TABLE IF NOT EXISTS {table}
             (
                 `date` Date CODEC(DoubleDelta),
                 `code` FixedString(6),
@@ -166,10 +166,10 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
             )
             ENGINE = ReplacingMergeTree()
             ORDER BY (date, code)
-        ", table)
+        ")
     } else {
         format!("
-            CREATE TABLE IF NOT EXISTS {}
+            CREATE TABLE IF NOT EXISTS {table}
             (
                 `date` Date CODEC(DoubleDelta),
                 `code` FixedString(6),
@@ -182,7 +182,7 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
             )
             ENGINE = ReplacingMergeTree()
             ORDER BY (date, code)
-        ", table)
+        ")
     }; // PARTITION BY 部分可能需要去掉
     let output = Command::new("clickhouse-client").args(["--query", &create_table]).output()?;
     check_output(output);
@@ -191,7 +191,7 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
 
 pub fn insert_clickhouse(output: &impl AsRef<Path>, table: &str, keep: bool) -> Result<()> {
     use subprocess::{Exec, Redirection};
-    let query = format!("INSERT INTO {} FORMAT CSVWithNames", table);
+    let query = format!("INSERT INTO {table} FORMAT CSVWithNames");
     let capture = Exec::cmd("clickhouse-client").args(&["--query", &query])
                                                 .stdin(Redirection::File(File::open(output)?))
                                                 .capture()?;
@@ -239,11 +239,10 @@ fn clickhouse_factor_csv(table: &str) -> Previous {
                      code,
                      last_value(close) AS close,
                      last_value(factor) AS factor
-                    FROM {0}
+                    FROM {table}
                     GROUP BY code
                     INTO OUTFILE 'factor.csv'
-                    FORMAT CSVWithNames;",
-                  table)];
+                    FORMAT CSVWithNames;")];
     let output = Command::new("clickhouse-client").args(args).output()?;
     check_output(output);
     previous_csv("factor.csv")
@@ -286,7 +285,7 @@ fn keep_csv(fname: &impl AsRef<Path>, keep: bool) -> io::Result<()> {
 /// 读取本地 xls(x) 文件
 pub fn read_xlsx(path: &str, col: usize, prefix: &str) -> Option<Stocklist> {
     use calamine::{open_workbook_auto, DataType, Reader};
-    let mut workbook = open_workbook_auto(&path).ok()?;
+    let mut workbook = open_workbook_auto(path).ok()?;
     let format_ = |x: &str| format!("{}{}", crate::cmd::auto_prefix(prefix, x), x);
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
@@ -382,11 +381,11 @@ pub async fn get_sz_stocks(set: Arc<StockList>) -> Result<usize> {
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
         set.extend(range.rows().skip(1).map(|r| match &r[4] {
-                                           DataType::Int(x) => format!("{}{}", ex, x),
+                                           DataType::Int(x) => format!("{ex}{x}"),
                                            DataType::Float(x) => {
                                                format!("{}{}", ex, *x as i64)
                                            }
-                                           DataType::String(x) => format!("{}{}", ex, x),
+                                           DataType::String(x) => format!("{ex}{x}"),
                                            _ => unreachable!(),
                                        }));
         Ok(range.height() - 1)
@@ -402,14 +401,13 @@ pub async fn get_sh_stocks(set: Arc<StockList>, stocktype: &str, pagesize: &str)
     let url = format!(
         "http://query.sse.com.cn/security/stock/getStockListData\
           .do?&jsonCallBack=jsonpCallback72491&isPagination=true&stockCode=&csrcCode=&areaName=\
-          &stockType={}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={}\
-          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678",
-        stocktype, pagesize
+          &stockType={stocktype}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={pagesize}\
+          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678"
     );
     let text =
         tokio::spawn(client.get(url).headers(HEADER_SSE.to_owned()).send().await?.text()).await??;
     let pos1 = text.find("total\":").ok_or(anyhow!("`Total` field not found"))? + 7;
-    let pos2 = text[pos1..pos1 + 10].find("}").ok_or(anyhow!("`Total` field not found"))? + pos1;
+    let pos2 = text[pos1..pos1 + 10].find('}').ok_or(anyhow!("`Total` field not found"))? + pos1;
     let n: usize = text[pos1..pos2].parse()?;
     // 注意：如果不 take 的话，split 有一半是重复的
     set.extend(text.split("COMPANY_CODE").skip(1).take(n).map(|s| format!("sh{}", &s[3..9])));

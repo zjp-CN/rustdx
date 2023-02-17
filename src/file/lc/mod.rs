@@ -46,10 +46,10 @@ impl Lc {
         use crate::bytes_helper::{f32_from_le_bytes, u16_from_le_bytes, u32_from_le_bytes};
         Self { date: u16_from_le_bytes(arr, 0),
                min: u16_from_le_bytes(arr, 2),
-               open: f32_from_le_bytes(arr, 4) as f32,
-               high: f32_from_le_bytes(arr, 8) as f32,
-               low: f32_from_le_bytes(arr, 12) as f32,
-               close: f32_from_le_bytes(arr, 16) as f32,
+               open: f32_from_le_bytes(arr, 4),
+               high: f32_from_le_bytes(arr, 8),
+               low: f32_from_le_bytes(arr, 12),
+               close: f32_from_le_bytes(arr, 16),
                amount: f32_from_le_bytes(arr, 20),
                vol: u32_from_le_bytes(arr, 24),
                code }
@@ -77,7 +77,7 @@ impl Lc {
     pub fn datetime_string(&self) -> String {
         self.hm_arr()
             .iter()
-            .fold(self.date_string(), |acc, &x| format!("{:02}:{:02}", acc, x))
+            .fold(self.date_string(), |acc, &x| format!("{acc:02}:{x:02}"))
     }
 
     /// `%Y-%m-%d` 格式的日期

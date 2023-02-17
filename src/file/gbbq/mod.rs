@@ -61,7 +61,7 @@ impl<'a> Gbbq<'a> {
     #[inline]
     pub fn from_chunk(chunk: &'a [u8]) -> Gbbq {
         Self { market:   u8_from_le_bytes(chunk, 0),
-               code:     unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) }.into(),
+               code:     unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) },
                date:     u32_from_le_bytes(chunk, 8),
                category: u8_from_le_bytes(chunk, 12),
                fh_qltp:  f32_from_le_bytes(chunk, 13),
@@ -84,7 +84,7 @@ impl<'a> Gbbq<'a> {
     #[inline]
     pub fn compute_pre_pct(&self, close: f32, mut preclose: f64, flag: bool) -> [f64; 3] {
         if flag {
-            preclose = (preclose as f64 * 10. - self.fh_qltp as f64
+            preclose = (preclose * 10. - self.fh_qltp as f64
                         + self.pg_hzgb as f64 * self.pgj_qzgb as f64)
                        / (10. + self.pg_hzgb as f64 + self.sg_hltp as f64)
         }
@@ -161,7 +161,7 @@ impl Gbbqs {
         } else {
             let res = self.data[4..].chunks_exact_mut(29)
                                     .map(parse)
-                                    .map(|x| Gbbq::from_chunk(x))
+                                    .map(Gbbq::from_chunk)
                                     // .map(Gbbq::from_chunk_mut)
                                     .collect();
             self.parsed = true;

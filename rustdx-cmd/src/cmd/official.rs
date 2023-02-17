@@ -79,10 +79,10 @@ impl Official {
                                       .send()
                                       .await?
                                       .text()).await??;
-        println!("{}", text);
+        println!("{text}");
         if self.json {
             let json: SzMarket = serde_json::from_str(&text[1..text.len() - 1])?;
-            println!("{:?}", json);
+            println!("{json:?}");
         }
         Ok(())
     }
@@ -101,11 +101,11 @@ impl Official {
                                       .send()
                                       .await?
                                       .text()).await??;
-        println!("{}", text);
+        println!("{text}");
         if self.json {
             // jQuery1124043835116035075705_1631539496628()
             let json: ShMarket = serde_json::from_str(&text[42..text.len() - 1])?;
-            println!("{:?}", json);
+            println!("{json:?}");
         }
         Ok(())
     }
@@ -117,11 +117,11 @@ impl Official {
                                       .send()
                                       .await?
                                       .text()).await??;
-        println!("{}", text);
+        println!("{text}");
         if self.json {
             // jQuery1124043835116035075705_1631539496628()
             let json: ShMarket = serde_json::from_str(&text[42..text.len() - 1])?;
-            println!("{:?}", json);
+            println!("{json:?}");
         }
         Ok(())
     }
@@ -133,11 +133,11 @@ impl Official {
                                       .send()
                                       .await?
                                       .text()).await??;
-        println!("{}", text);
+        println!("{text}");
         if self.json {
             // jQuery1124043835116035075705_1631539496628()
             let json: ShMarket = serde_json::from_str(&text[42..text.len() - 1])?;
-            println!("{:?}", json);
+            println!("{json:?}");
         }
         Ok(())
     }
