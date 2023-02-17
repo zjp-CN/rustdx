@@ -67,11 +67,11 @@ async fn get_sh(stocktype: &str, pagesize: &str) -> Result<Vec<String>> {
 
     let url = format!("http://query.sse.com.cn/security/stock/getStockListData\
           .do?&jsonCallBack=jsonpCallback72491&isPagination=true&stockCode=&csrcCode=&areaName=\
-          &stockType={}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={}\
-          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678", stocktype, pagesize);
+          &stockType={stocktype}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={pagesize}\
+          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678");
     let text = client.get(url).headers(headers).send().await?.text().await?;
     let pos1 = text.find("total\":").ok_or(anyhow!("`Total` field not found"))? + 7;
-    let pos2 = text[pos1..pos1 + 10].find("}").ok_or(anyhow!("`Total` field not found"))? + pos1;
+    let pos2 = text[pos1..pos1 + 10].find('}').ok_or(anyhow!("`Total` field not found"))? + pos1;
     let n: usize = text[pos1..pos2].parse()?;
     // 注意：如果不 take 的话，split 有一半是重复的
     Ok(text.split("COMPANY_CODE")
@@ -93,9 +93,9 @@ async fn get_sz() -> Result<Vec<String>> {
         Ok(range.rows()
                 .skip(1)
                 .map(|r| match &r[4] {
-                    DataType::Int(x) => format! {"{}{}", prefix, x.to_string()}.into(),
-                    DataType::Float(x) => format! {"{}{}", prefix, *x as i64}.into(),
-                    DataType::String(x) => format! {"{}{}", prefix, x}.into(),
+                    DataType::Int(x) => format! {"{prefix}{x}"},
+                    DataType::Float(x) => format! {"{}{}", prefix, *x as i64},
+                    DataType::String(x) => format! {"{prefix}{x}"},
                     _ => unreachable!(),
                 })
                 .collect())

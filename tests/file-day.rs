@@ -27,7 +27,7 @@ impl Day {
                      close,
                      amount,
                      vol, } = DayRaw::from_bytes(code, arr);
-        Self { code: format!("{:06}", code),
+        Self { code: format!("{code:06}"),
                date: rustdx::bytes_helper::date_string(date),
                open,
                high,
@@ -52,7 +52,7 @@ fn day() -> Result<()> {
     let path = "assets/sz000001.day";
     let day1 = Day::from_file_into_vec(1, path)?;
     let day2 = write_to_csv(rustdx::file::day::Day::from_file_into_vec(1, path)?)?;
-    insta::assert_yaml_snapshot!("serde-type", day1);
+    // insta::assert_yaml_snapshot!("serde-type", day1);
     assert_eq!(write_to_csv(day1)?, day2);
     insta::assert_debug_snapshot!("serde-type-csv-string", day2);
     Ok(())

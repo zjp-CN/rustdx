@@ -94,9 +94,9 @@ impl DayCmd {
         // self.path.iter().map(|p| p.read_dir()).for_each(|p| println!("{:?}", p));
         for arg in &self.description {
             match arg.as_str() {
-                "output" | "o" => println!("{}", DAYCMD_OUTPUT),
-                "stocklist" | "l" => println!("{}", DAYCMD_STOCKLIST),
-                "exchange" | "e" => println!("{}", DAYCMD_EXCHANGE),
+                "output" | "o" => println!("{DAYCMD_OUTPUT}"),
+                "stocklist" | "l" => println!("{DAYCMD_STOCKLIST}"),
+                "exchange" | "e" => println!("{DAYCMD_EXCHANGE}"),
                 _ => println!("请查询以下参数：output stocklist exchange 或者它们的简写 o l \
                                e；\n使用 `-h e -h l` 的形式查询多个参数的使用方法"),
             }
@@ -155,7 +155,7 @@ pub fn auto_prefix<'a>(prefix: &'a str, code: &'a str) -> &'a str {
 }
 
 #[rustfmt::skip]
-const DAYCMD_EXCHANGE: &'static str = "--exchange 或 -e ：
+const DAYCMD_EXCHANGE: &str = "--exchange 或 -e ：
 指定 day 文件的代码开头，一般搭配 `-l` 使用：
  * `sz`
  * `sh`
@@ -166,7 +166,7 @@ const DAYCMD_EXCHANGE: &'static str = "--exchange 或 -e ：
 // 【todo】如果提供 txt 文件路径，则读取里面的六位代码数据。使用 `\\n` 分隔。
 // 【todo】如果提供数据库路径，则使用数据库的股票代码。
 #[rustfmt::skip]
-const DAYCMD_STOCKLIST: &'static str = "--stocklist 或 -l ：
+const DAYCMD_STOCKLIST: &str = "--stocklist 或 -l ：
 匹配 `.day` 之前的内容：比如 `sz000001`。具体用法：
  * `-l official` 从上交所和深交所官网获取最新的 A 股、科创板、创业板股票代码列表
  * `-l sse` 从上交所官网获取 A 股、科创板股票代码列表
@@ -195,7 +195,7 @@ const DAYCMD_STOCKLIST: &'static str = "--stocklist 或 -l ：
 ";
 
 #[rustfmt::skip]
-const DAYCMD_OUTPUT: &'static str = "--output 或 -o ：
+const DAYCMD_OUTPUT: &str = "--output 或 -o ：
 解析后的输出方式：
 `-o csv_path.csv` 保存成 csv 格式，默认值为 stocks.csv，表示当前目录的 stocks.csv 文件
 `-o clickhouse` 保存成 csv 格式，并把 csv 的数据插入到 clickhouse 数据库

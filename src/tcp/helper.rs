@@ -82,7 +82,7 @@ pub fn price(arr: &[u8], pos: &mut usize) -> i32 {
     }
     *pos += 1;
 
-    return if sign { res } else { -res };
+    if sign { res } else { -res }
 }
 
 pub fn vol_amount(ivol: i32) -> f64 {

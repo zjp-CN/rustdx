@@ -58,5 +58,5 @@ pub fn ser_date_string<S>(date: &u32, serializer: S) -> Result<S::Ok, S::Error>
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub fn ser_code_string<S>(code: &u32, serializer: S) -> Result<S::Ok, S::Error>
     where S: serde::Serializer {
-    serializer.serialize_str(&format!("{:06}", code))
+    serializer.serialize_str(&format!("{code:06}"))
 }

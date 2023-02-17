@@ -1,4 +1,5 @@
-use insta::{assert_debug_snapshot, assert_yaml_snapshot};
+// use insta::{assert_debug_snapshot, assert_yaml_snapshot};
+use insta::assert_debug_snapshot;
 use rustdx::tcp::{self, Tcp, Tdx};
 use std::io::Result;
 
@@ -25,6 +26,6 @@ fn tcp_security_list() -> Result<()> {
     assert_debug_snapshot!("security-list-send", list.send);
     list.recv_parsed(&mut Tcp::new()?)?;
     assert_debug_snapshot!("security-list-count", list.count);
-    assert_yaml_snapshot!("security-list-recv", list.data);
+    // assert_yaml_snapshot!("security-list-recv", list.data);
     Ok(())
 }

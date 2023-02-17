@@ -15,7 +15,7 @@ impl<'d> Default for Xdxr<'d> {
     fn default() -> Self {
         Self { send:     {
                    let mut arr = [0; Self::LEN];
-                   arr.copy_from_slice(&Self::SEND);
+                   arr.copy_from_slice(Self::SEND);
                    arr.into()
                },
                market:   0,

@@ -39,10 +39,10 @@ impl TopLevel {
     pub fn match_subcmd(&self) -> Result<()> {
         use SubCommand::*;
         if self.print_struct {
-            println!("{:#?}", self);
+            println!("{self:#?}");
         }
         if self.version {
-            println!("{}", VERSION);
+            println!("{VERSION}");
             std::process::exit(0);
         }
         match self.sub {

@@ -67,7 +67,7 @@ impl East {
         let text = crate::io::RUNTIME.block_on(self.get())?;
         let json = Self::json(&text)?;
         if self.show {
-            println!("text:\n{}\njson:\n{:?}", text, json);
+            println!("text:\n{text}\njson:\n{json:?}");
         }
 
         {
@@ -86,7 +86,7 @@ impl East {
         let text = crate::io::RUNTIME.block_on(self.get())?;
         let json = Self::json(&text)?;
         if self.show {
-            println!("text:\n{}\njson:\n{:?}", text, json);
+            println!("text:\n{text}\njson:\n{json:?}");
         }
         self._run_previous(json)?;
         self.insert_clickhouse()
@@ -111,7 +111,7 @@ impl East {
                                 } else if (p as f64 - f.preclose).abs() < 0.01 {
                                     (row.factor - f.compute_factor(c as f64)).abs() < 0.01
                                 } else {
-                                    self.ignore.iter().find(|&x| x == row.code.as_str()).is_some()
+                                    self.ignore.iter().any(|x| x == row.code.as_str())
                                 },
                                 "code: #{}#\neast: factor: {}, preclose: {}\nfq: factor: {}, \
                                  preclose: {}",
