@@ -164,7 +164,7 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
                 `preclose` Float64,
                 `factor` Float64
             )
-            ENGINE = MergeTree()
+            ENGINE = ReplacingMergeTree()
             ORDER BY (date, code)
         ", table)
     } else {
@@ -180,7 +180,7 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
                 `amount` Float64,
                 `vol` Float64
             )
-            ENGINE = MergeTree()
+            ENGINE = ReplacingMergeTree()
             ORDER BY (date, code)
         ", table)
     }; // PARTITION BY 部分可能需要去掉
