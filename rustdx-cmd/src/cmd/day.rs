@@ -97,8 +97,10 @@ impl DayCmd {
                 "output" | "o" => println!("{DAYCMD_OUTPUT}"),
                 "stocklist" | "l" => println!("{DAYCMD_STOCKLIST}"),
                 "exchange" | "e" => println!("{DAYCMD_EXCHANGE}"),
-                _ => println!("请查询以下参数：output stocklist exchange 或者它们的简写 o l \
-                               e；\n使用 `-h e -h l` 的形式查询多个参数的使用方法"),
+                _ => println!(
+                    "请查询以下参数：output stocklist exchange 或者它们的简写 o l \
+                               e；\n使用 `-h e -h l` 的形式查询多个参数的使用方法"
+                ),
             }
         }
         self
@@ -107,7 +109,11 @@ impl DayCmd {
     /// 匹配 `.day` 之前的内容：比如 `sz000001`
     pub fn stocklist(&self) -> Option<Stocklist> {
         use crate::io::{get_offical_stocks, read_xlsx};
-        match (self.stocklist.as_deref(), self.exchange.as_deref(), self.xlsx_col) {
+        match (
+            self.stocklist.as_deref(),
+            self.exchange.as_deref(),
+            self.xlsx_col,
+        ) {
             (Some("official"), _, _) => get_offical_stocks("official"),
             (Some("sse"), _, _) => get_offical_stocks("sse"),
             (Some("szse"), _, _) => get_offical_stocks("szse"),
@@ -131,15 +137,23 @@ impl DayCmd {
         let ex_f = &fname[len - 12..len - 10];
         let match_ex = |ex: &str| ex == ex_f || ex == "auto";
         let c = code.parse();
-        (c.is_ok()
-         && self.exchange.as_deref().map(match_ex).unwrap_or(true)
-         && self.code.as_ref().map(|s| code.starts_with(s)).unwrap_or(true),
-         c.unwrap_or(0))
+        (
+            c.is_ok()
+                && self.exchange.as_deref().map(match_ex).unwrap_or(true)
+                && self
+                    .code
+                    .as_ref()
+                    .map(|s| code.starts_with(s))
+                    .unwrap_or(true),
+            c.unwrap_or(0),
+        )
     }
 
     fn parse_list(&self, p: &str) -> Option<Stocklist> {
         let prefix = |x: &str| format!("{}{}", auto_prefix(p, x), x);
-        self.stocklist.as_ref().map(|s| s.split(',').map(prefix).collect())
+        self.stocklist
+            .as_ref()
+            .map(|s| s.split(',').map(prefix).collect())
     }
 }
 

@@ -47,7 +47,11 @@ enum Exchange {
 fn read_excel(path: &str, ex: Exchange) -> Result<Sheets> {
     let now = Instant::now();
     let mut workbook = open_workbook_auto(&path)?;
-    println!("{:30}：{} s", path, now.elapsed().as_millis() as f64 / 1000.0);
+    println!(
+        "{:30}：{} s",
+        path,
+        now.elapsed().as_millis() as f64 / 1000.0
+    );
 
     let pos = match_ex(ex);
 
@@ -55,16 +59,22 @@ fn read_excel(path: &str, ex: Exchange) -> Result<Sheets> {
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
         let total_cells = range.get_size().0 * range.get_size().1;
         let non_empty_cells: usize = range.used_cells().count();
-        println!("{:?} Found {} cells in {:?}, including {} non empty cells",
-                 path,
-                 total_cells,
-                 workbook.sheet_names(),
-                 non_empty_cells);
+        println!(
+            "{:?} Found {} cells in {:?}, including {} non empty cells",
+            path,
+            total_cells,
+            workbook.sheet_names(),
+            non_empty_cells
+        );
         // alternatively, we can manually filter rows
         // assert_eq!(non_empty_cells,
         //            range.rows().flat_map(|r| r.iter().filter(|&c| c !=
         // &DataType::Empty)).count());
-        range.rows().next_back().map(|r| println!("{:?}", get_string(&r[pos]))).unwrap();
+        range
+            .rows()
+            .next_back()
+            .map(|r| println!("{:?}", get_string(&r[pos])))
+            .unwrap();
     }
 
     Ok(workbook)

@@ -10,7 +10,10 @@ fn main() -> Result<()> {
             let mut day = tcp::stock::Kline::default();
             println!("#000001# 最近三天 K 线\n{:#?}", day.recv_parsed(&mut tcp)?);
 
-            println!("list len: {}", tcp::stock::SecurityList::new().recv_parsed(&mut tcp)?.len());
+            println!(
+                "list len: {}",
+                tcp::stock::SecurityList::new().recv_parsed(&mut tcp)?.len()
+            );
 
             break;
         } else {
@@ -44,10 +47,12 @@ fn log_init() -> Result<()> {
 
     let _ = WriteLogger::init(log_level, Config::default(), File::create("rustdx.log")?);
     if let Some(unrecognized) = unrecognized_log_level {
-        log::error!("`{}` is an unrecognized log level. Falling back to log level 'error'. \
+        log::error!(
+            "`{}` is an unrecognized log level. Falling back to log level 'error'. \
                      Recognized log levels are: 'off', 'error', 'warning', 'info', 'debug' and \
                      'trace'.",
-                    unrecognized);
+            unrecognized
+        );
     }
     Ok(())
 }

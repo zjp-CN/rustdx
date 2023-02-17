@@ -21,5 +21,5 @@ fn main() {
     let p = Path::new(&var("OUT_DIR").expect("no `OUT_DIR`")).join("VERSION");
     let mut f = File::create(p).unwrap_or_else(|_| panic!("{}", "{p:?} not created"));
     f.write_all(version.trim().as_bytes())
-     .unwrap_or_else(|_| panic!("{}", "{p:?} not written"));
+        .unwrap_or_else(|_| panic!("{}", "{p:?} not written"));
 }

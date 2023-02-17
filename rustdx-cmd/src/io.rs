@@ -18,23 +18,26 @@ const BUFFER_SIZE: usize = 32 * (1 << 20); // 32M
 pub fn run_csv(cmd: &DayCmd) -> Result<()> {
     let hm = cmd.stocklist();
     let file = File::create(&cmd.output)?;
-    let mut wtr = csv::WriterBuilder::new().buffer_capacity(BUFFER_SIZE).from_writer(file);
+    let mut wtr = csv::WriterBuilder::new()
+        .buffer_capacity(BUFFER_SIZE)
+        .from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
         println!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
-        filter_file(dir)?.map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
-                         .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
-                         .take(take)
-                         .filter_map(|((_, code), src)| {
-                             count += 1;
-                             println!("#{code:06}# {src:?}");
-                             rustdx::file::day::Day::from_file_into_vec(code, src).ok()
-                         })
-                         .flatten()
-                         .try_for_each(|t| wtr.serialize(t))?;
+        filter_file(dir)?
+            .map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
+            .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
+            .take(take)
+            .filter_map(|((_, code), src)| {
+                count += 1;
+                println!("#{code:06}# {src:?}");
+                rustdx::file::day::Day::from_file_into_vec(code, src).ok()
+            })
+            .flatten()
+            .try_for_each(|t| wtr.serialize(t))?;
 
         print(dir, count, take);
     }
@@ -51,23 +54,26 @@ pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
     let hm = cmd.stocklist();
 
     let file = File::create(&cmd.output)?;
-    let mut wtr = csv::WriterBuilder::new().buffer_capacity(BUFFER_SIZE).from_writer(file);
+    let mut wtr = csv::WriterBuilder::new()
+        .buffer_capacity(BUFFER_SIZE)
+        .from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
         println!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
-        filter_file(dir)?.map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
-                         .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
-                         .take(take)
-                         .filter_map(|((_, code), src)| {
-                             count += 1;
-                             println!("#{code:06}# {src:?}");
-                             Day::new(code, src, gbbq.get(&code).map(Vec::as_slice)).ok()
-                         })
-                         .flatten()
-                         .try_for_each(|t| wtr.serialize(t))?;
+        filter_file(dir)?
+            .map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
+            .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
+            .take(take)
+            .filter_map(|((_, code), src)| {
+                count += 1;
+                println!("#{code:06}# {src:?}");
+                Day::new(code, src, gbbq.get(&code).map(Vec::as_slice)).ok()
+            })
+            .flatten()
+            .try_for_each(|t| wtr.serialize(t))?;
 
         print(dir, count, take);
     }
@@ -87,27 +93,33 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
     let hm = cmd.stocklist();
 
     let file = File::create(&cmd.output)?;
-    let mut wtr = csv::WriterBuilder::new().buffer_capacity(BUFFER_SIZE).from_writer(file);
+    let mut wtr = csv::WriterBuilder::new()
+        .buffer_capacity(BUFFER_SIZE)
+        .from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
         println!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
-        filter_file(dir)?.map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
-                         .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
-                         .take(take)
-                         .filter_map(|((_, code), src)| {
-                             count += 1;
-                             println!("#{code:06}# {src:?}");
-                             Day::concat(code,
-                                         src,
-                                         // 无分红数据并不意味着无复权数据
-                                         gbbq.get(&code).map(Vec::as_slice),
-                                         previous.get(&code)).ok()
-                         })
-                         .flatten()
-                         .try_for_each(|t| wtr.serialize(t))?;
+        filter_file(dir)?
+            .map(|f| (cmd.filter_ec(f.to_str().unwrap()), f))
+            .filter(|((b, _), s)| filter(*b, s, hm.as_ref(), dir).unwrap_or(false))
+            .take(take)
+            .filter_map(|((_, code), src)| {
+                count += 1;
+                println!("#{code:06}# {src:?}");
+                Day::concat(
+                    code,
+                    src,
+                    // 无分红数据并不意味着无复权数据
+                    gbbq.get(&code).map(Vec::as_slice),
+                    previous.get(&code),
+                )
+                .ok()
+            })
+            .flatten()
+            .try_for_each(|t| wtr.serialize(t))?;
 
         print(dir, count, take);
     }
@@ -146,7 +158,9 @@ fn database_table(table: &str) -> (&str, &str) {
 
 pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
     let create_database = format!("CREATE DATABASE IF NOT EXISTS {}", database_table(table).0);
-    let output = Command::new("clickhouse-client").args(["--query", &create_database]).output()?;
+    let output = Command::new("clickhouse-client")
+        .args(["--query", &create_database])
+        .output()?;
     check_output(output);
     #[rustfmt::skip]
     let create_table = if fq {
@@ -184,7 +198,9 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
             ORDER BY (date, code)
         ")
     }; // PARTITION BY 部分可能需要去掉
-    let output = Command::new("clickhouse-client").args(["--query", &create_table]).output()?;
+    let output = Command::new("clickhouse-client")
+        .args(["--query", &create_table])
+        .output()?;
     check_output(output);
     Ok(())
 }
@@ -192,10 +208,15 @@ pub fn setup_clickhouse(fq: bool, table: &str) -> Result<()> {
 pub fn insert_clickhouse(output: &impl AsRef<Path>, table: &str, keep: bool) -> Result<()> {
     use subprocess::{Exec, Redirection};
     let query = format!("INSERT INTO {table} FORMAT CSVWithNames");
-    let capture = Exec::cmd("clickhouse-client").args(&["--query", &query])
-                                                .stdin(Redirection::File(File::open(output)?))
-                                                .capture()?;
-    println!("stdout:\n{}stderr:\n{}", capture.stdout_str(), capture.stderr_str());
+    let capture = Exec::cmd("clickhouse-client")
+        .args(&["--query", &query])
+        .stdin(Redirection::File(File::open(output)?))
+        .capture()?;
+    println!(
+        "stdout:\n{}stderr:\n{}",
+        capture.stdout_str(),
+        capture.stderr_str()
+    );
     assert!(capture.success());
     keep_csv(output, keep)?;
     Ok(())
@@ -224,17 +245,19 @@ pub fn previous_csv_table(path: &Option<std::path::PathBuf>, table: &str) -> Pre
 
 /// 读取前收盘价（前 factor ）数据
 pub fn previous_csv(p: impl AsRef<Path>) -> Previous {
-    Ok(csv::Reader::from_reader(File::open(p)?).deserialize::<Factor>()
-                                               .filter_map(|f| f.ok())
-                                               .map(|f| (f.code.parse().unwrap(), f))
-                                               .collect())
+    Ok(csv::Reader::from_reader(File::open(p)?)
+        .deserialize::<Factor>()
+        .filter_map(|f| f.ok())
+        .map(|f| (f.code.parse().unwrap(), f))
+        .collect())
 }
 
 /// 获取当前最新 factor
 fn clickhouse_factor_csv(table: &str) -> Previous {
-    let args =
-        ["--query",
-         &format!("SELECT
+    let args = [
+        "--query",
+        &format!(
+            "SELECT
                      yesterday() AS date,
                      code,
                      last_value(close) AS close,
@@ -242,7 +265,9 @@ fn clickhouse_factor_csv(table: &str) -> Previous {
                     FROM {table}
                     GROUP BY code
                     INTO OUTFILE 'factor.csv'
-                    FORMAT CSVWithNames;")];
+                    FORMAT CSVWithNames;"
+        ),
+    ];
     let output = Command::new("clickhouse-client").args(args).output()?;
     check_output(output);
     previous_csv("factor.csv")
@@ -253,15 +278,17 @@ pub fn run_mongodb(cmd: &DayCmd) -> Result<()> {
     cmd.run_csv()?;
     // TODO:排查为什么 date 列无法变成 date 类型 date.date(2006-01-02)
     let (database_name, table_name) = database_table(&cmd.table);
-    let args = ["--db",
-                database_name,
-                "--collection",
-                table_name,
-                "--type=csv",
-                "--file",
-                &cmd.output,
-                "--columnsHaveTypes",
-                "--fields=code.string()"];
+    let args = [
+        "--db",
+        database_name,
+        "--collection",
+        table_name,
+        "--type=csv",
+        "--file",
+        &cmd.output,
+        "--columnsHaveTypes",
+        "--fields=code.string()",
+    ];
     let output = Command::new("mongoimport").args(args).output()?;
     check_output(output);
     keep_csv(&cmd.output, cmd.keep_csv)?;
@@ -289,15 +316,18 @@ pub fn read_xlsx(path: &str, col: usize, prefix: &str) -> Option<Stocklist> {
     let format_ = |x: &str| format!("{}{}", crate::cmd::auto_prefix(prefix, x), x);
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
-        Some(range.rows()
-                  .skip(1)
-                  .map(|r| match &r[col] {
-                      DataType::Int(x) => format_(&x.to_string()),
-                      DataType::Float(x) => format_(&(*x as i64).to_string()),
-                      DataType::String(x) => format_(x),
-                      _ => unreachable!(),
-                  })
-                  .collect())
+        Some(
+            range
+                .rows()
+                .skip(1)
+                .map(|r| match &r[col] {
+                    DataType::Int(x) => format_(&x.to_string()),
+                    DataType::Float(x) => format_(&(*x as i64).to_string()),
+                    DataType::String(x) => format_(x),
+                    _ => unreachable!(),
+                })
+                .collect(),
+        )
     } else {
         None
     }
@@ -312,13 +342,21 @@ impl StockList {
         self.0.lock().unwrap().extend(iter)
     }
 
-    pub fn new() -> Self { Self(Mutex::new(Stocklist::new())) }
+    pub fn new() -> Self {
+        Self(Mutex::new(Stocklist::new()))
+    }
 
-    pub fn with_capacity(n: usize) -> Self { Self(Mutex::new(Stocklist::with_capacity(n))) }
+    pub fn with_capacity(n: usize) -> Self {
+        Self(Mutex::new(Stocklist::with_capacity(n)))
+    }
 
-    pub fn len(&self) -> usize { self.0.lock().unwrap().len() }
+    pub fn len(&self) -> usize {
+        self.0.lock().unwrap().len()
+    }
 
-    pub fn into_inner(self) -> Stocklist { self.0.into_inner().unwrap() }
+    pub fn into_inner(self) -> Stocklist {
+        self.0.into_inner().unwrap()
+    }
 }
 
 // 股票上限
@@ -328,9 +366,11 @@ const SH1: &str = "1800";
 /// sh8, sh1, sz: 407, 1665, 2618 => 4690
 /// 此数据可运行 `test_get_offical_stocks` 得知
 pub async fn offical_stocks(set: Arc<StockList>) -> Result<usize> {
-    let len = futures::try_join!(get_sh_stocks(set.clone(), "8", SH8),
-                                 get_sh_stocks(set.clone(), "1", SH1),
-                                 get_sz_stocks(set.clone()))?;
+    let len = futures::try_join!(
+        get_sh_stocks(set.clone(), "8", SH8),
+        get_sh_stocks(set.clone(), "1", SH1),
+        get_sz_stocks(set.clone())
+    )?;
     dbg!(len);
     let len = len.0 + len.1 + len.2;
     debug_assert_eq!(set.len(), len);
@@ -339,22 +379,27 @@ pub async fn offical_stocks(set: Arc<StockList>) -> Result<usize> {
 
 pub fn get_offical_stocks(cond: &str) -> Option<Stocklist> {
     let set = Arc::new(StockList::with_capacity(4816));
-    let len = RUNTIME.block_on(async {
-                         match cond {
-                             "official" => offical_stocks(set.clone()).await,
-                             "szse" => get_sz_stocks(set.clone()).await,
-                             "sse" => {
-                                 let l = futures::try_join!(get_sh_stocks(set.clone(), "8", SH8),
-                                                            get_sh_stocks(set.clone(), "1", SH1),)?;
-                                 Ok(l.0 + l.1)
-                             }
-                             _ => unreachable!(),
-                         }
-                     })
-                     .ok()?;
+    let len = RUNTIME
+        .block_on(async {
+            match cond {
+                "official" => offical_stocks(set.clone()).await,
+                "szse" => get_sz_stocks(set.clone()).await,
+                "sse" => {
+                    let l = futures::try_join!(
+                        get_sh_stocks(set.clone(), "8", SH8),
+                        get_sh_stocks(set.clone(), "1", SH1),
+                    )?;
+                    Ok(l.0 + l.1)
+                }
+                _ => unreachable!(),
+            }
+        })
+        .ok()?;
 
     dbg!(len);
-    let set = Arc::try_unwrap(set).expect("获取交易所股票列表数据失败").into_inner();
+    let set = Arc::try_unwrap(set)
+        .expect("获取交易所股票列表数据失败")
+        .into_inner();
     Some(set)
 }
 
@@ -362,7 +407,9 @@ pub fn get_offical_stocks(cond: &str) -> Option<Stocklist> {
 fn test_get_offical_stocks() -> Result<()> {
     let set = Arc::new(StockList::with_capacity(4816));
     let len = RUNTIME.block_on(offical_stocks(set.clone()))?;
-    let set = Arc::try_unwrap(set).expect("获取交易所股票列表数据失败").into_inner();
+    let set = Arc::try_unwrap(set)
+        .expect("获取交易所股票列表数据失败")
+        .into_inner();
     assert_eq!(set.len(), len);
     dbg!(len);
     Ok(())
@@ -381,13 +428,13 @@ pub async fn get_sz_stocks(set: Arc<StockList>) -> Result<usize> {
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
         set.extend(range.rows().skip(1).map(|r| match &r[4] {
-                                           DataType::Int(x) => format!("{ex}{x}"),
-                                           DataType::Float(x) => {
-                                               format!("{}{}", ex, *x as i64)
-                                           }
-                                           DataType::String(x) => format!("{ex}{x}"),
-                                           _ => unreachable!(),
-                                       }));
+            DataType::Int(x) => format!("{ex}{x}"),
+            DataType::Float(x) => {
+                format!("{}{}", ex, *x as i64)
+            }
+            DataType::String(x) => format!("{ex}{x}"),
+            _ => unreachable!(),
+        }));
         Ok(range.height() - 1)
     } else {
         Err(anyhow!("xlsx parse error"))
@@ -404,13 +451,31 @@ pub async fn get_sh_stocks(set: Arc<StockList>, stocktype: &str, pagesize: &str)
           &stockType={stocktype}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={pagesize}\
           &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678"
     );
-    let text =
-        tokio::spawn(client.get(url).headers(HEADER_SSE.to_owned()).send().await?.text()).await??;
-    let pos1 = text.find("total\":").ok_or(anyhow!("`Total` field not found"))? + 7;
-    let pos2 = text[pos1..pos1 + 10].find('}').ok_or(anyhow!("`Total` field not found"))? + pos1;
+    let text = tokio::spawn(
+        client
+            .get(url)
+            .headers(HEADER_SSE.to_owned())
+            .send()
+            .await?
+            .text(),
+    )
+    .await??;
+    let pos1 = text
+        .find("total\":")
+        .ok_or(anyhow!("`Total` field not found"))?
+        + 7;
+    let pos2 = text[pos1..pos1 + 10]
+        .find('}')
+        .ok_or(anyhow!("`Total` field not found"))?
+        + pos1;
     let n: usize = text[pos1..pos2].parse()?;
     // 注意：如果不 take 的话，split 有一半是重复的
-    set.extend(text.split("COMPANY_CODE").skip(1).take(n).map(|s| format!("sh{}", &s[3..9])));
+    set.extend(
+        text.split("COMPANY_CODE")
+            .skip(1)
+            .take(n)
+            .map(|s| format!("sh{}", &s[3..9])),
+    );
     Ok(n)
 }
 

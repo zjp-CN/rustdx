@@ -42,16 +42,23 @@ impl East {
         let client = reqwest::Client::new();
         // 如果需要升序，使用 `order=code%2Case` 或者 `order=`
         // ashare => A 股，bshare => B 股，kshare => 科创板，equity => 前三种
-        let url = format!("http://56.push2.eastmoney.com/api/qt/clist/get?\
+        let url = format!(
+            "http://56.push2.eastmoney.com/api/qt/clist/get?\
             cb=jQuery112407375845698232317_1631693257414&\
             pn=1&pz={}&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&\
             fltt=2&invt=2&fid=f12&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23&\
-            fields=f18,f16,f12,f17,f15,f2,f6,f5&_=1631693257534", self.n);
-        let text = tokio::spawn(client.get(url)
-                                      // .headers(HEADER_SSE.to_owned())
-                                      .send()
-                                      .await?
-                                      .text()).await??;
+            fields=f18,f16,f12,f17,f15,f2,f6,f5&_=1631693257534",
+            self.n
+        );
+        let text = tokio::spawn(
+            client
+                .get(url)
+                // .headers(HEADER_SSE.to_owned())
+                .send()
+                .await?
+                .text(),
+        )
+        .await??;
         Ok(text)
     }
 
@@ -106,20 +113,22 @@ impl East {
                     // debug_assert_eq!(row.factor, f.compute_factor(c as f64));
                     #[cfg(debug_assertions)]
                     {
-                        assert!(if self.ignore.get(0).map(|x| x == "all").unwrap_or(false) {
-                                    true
-                                } else if (p as f64 - f.preclose).abs() < 0.01 {
-                                    (row.factor - f.compute_factor(c as f64)).abs() < 0.01
-                                } else {
-                                    self.ignore.iter().any(|x| x == row.code.as_str())
-                                },
-                                "code: #{}#\neast: factor: {}, preclose: {}\nfq: factor: {}, \
+                        assert!(
+                            if self.ignore.get(0).map(|x| x == "all").unwrap_or(false) {
+                                true
+                            } else if (p as f64 - f.preclose).abs() < 0.01 {
+                                (row.factor - f.compute_factor(c as f64)).abs() < 0.01
+                            } else {
+                                self.ignore.iter().any(|x| x == row.code.as_str())
+                            },
+                            "code: #{}#\neast: factor: {}, preclose: {}\nfq: factor: {}, \
                                  preclose: {}",
-                                row.code,
-                                row.factor,
-                                p,
-                                f.compute_factor(c as f64),
-                                f.preclose);
+                            row.code,
+                            row.factor,
+                            p,
+                            f.compute_factor(c as f64),
+                            f.preclose
+                        );
                     }
                 } else {
                     row.factor = c as f64 / p as f64;
@@ -155,32 +164,32 @@ impl East {
 pub struct Day<'a> {
     /// `date` 为 `%Y-%m-%d` 文本格式
     #[serde(skip_deserializing, default = "default_date")]
-    pub date:     String,
+    pub date: String,
     #[serde(rename(deserialize = "f12"))]
-    pub code:     String,
+    pub code: String,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f17"))]
-    pub open:     F32<'a>,
+    pub open: F32<'a>,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f15"))]
-    pub high:     F32<'a>,
+    pub high: F32<'a>,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f16"))]
-    pub low:      F32<'a>,
+    pub low: F32<'a>,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f2"))]
-    pub close:    F32<'a>,
+    pub close: F32<'a>,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f6"))]
-    pub amount:   F32<'a>,
+    pub amount: F32<'a>,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f5"))]
-    pub vol:      F32<'a>,
+    pub vol: F32<'a>,
     #[serde(borrow)]
     #[serde(rename(deserialize = "f18"))]
     pub preclose: F32<'a>,
     #[serde(skip_deserializing, default)]
-    pub factor:   f64,
+    pub factor: f64,
 }
 
 /// 排除掉 "-" 无实际数据的股票
@@ -192,7 +201,9 @@ pub enum F32<'a> {
 }
 
 /// TODO： 最新的交易日，而不是当天
-fn default_date() -> String { chrono::Local::today().format("%Y-%m-%d").to_string() }
+fn default_date() -> String {
+    chrono::Local::today().format("%Y-%m-%d").to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EastMarket<'a> {
@@ -204,6 +215,6 @@ pub struct EastMarket<'a> {
 pub struct EastData<'a> {
     // pub diff:  Vec<Factor>,
     #[serde(borrow)]
-    pub diff:  Vec<Day<'a>>,
+    pub diff: Vec<Day<'a>>,
     pub total: u16,
 }
