@@ -69,16 +69,22 @@ impl Official {
         let client = reqwest::Client::new();
         // 如果需要升序，使用 `order=code%2Case` 或者 `order=`
         // ashare => A 股，bshare => B 股，kshare => 科创板，equity => 前三种
-        let url = format!("http://www.szse.cn/api/report/ShowReport/data?\
+        let url = format!(
+            "http://www.szse.cn/api/report/ShowReport/data?\
               SHOWTYPE=JSON&CATALOGID=1815_stock&TABKEY=tab1&\
               PAGENO=1&tab1PAGESIZE={}&txtBeginDate={}&txtEndDate={}\
-              &radioClass=00%2C20%2C30&txtSite=all&random=0.30236852035138306", 
-              self.end, self.begin_date, self.end_date);
-        let text = tokio::spawn(client.get(url)
-                                      .headers(HEADER_SZSE.to_owned())
-                                      .send()
-                                      .await?
-                                      .text()).await??;
+              &radioClass=00%2C20%2C30&txtSite=all&random=0.30236852035138306",
+            self.end, self.begin_date, self.end_date
+        );
+        let text = tokio::spawn(
+            client
+                .get(url)
+                .headers(HEADER_SZSE.to_owned())
+                .send()
+                .await?
+                .text(),
+        )
+        .await??;
         println!("{text}");
         if self.json {
             let json: SzMarket = serde_json::from_str(&text[1..text.len() - 1])?;
@@ -91,16 +97,23 @@ impl Official {
         let client = reqwest::Client::new();
         // 如果需要升序，使用 `order=code%2Case` 或者 `order=`
         // ashare => A 股，bshare => B 股，kshare => 科创板，equity => 前三种
-        let url = format!("http://yunhq.sse.com.cn:32041//v1/sh1/list/exchange/equity?\
+        let url = format!(
+            "http://yunhq.sse.com.cn:32041//v1/sh1/list/exchange/equity?\
               callback=jQuery112406614406761214793_1631509021909&\
               select=code%2Cname%2Copen%2Chigh%2Clow%2Clast%2Cprev_close%2Cchg_rate%2C\
               volume%2Camount%2Cchange%2Camp_rate%2Ccpxxsubtype&\
-              order=&begin={}&end={}&_=1631509021915", self.begin, self.end);
-        let text = tokio::spawn(client.get(url)
-                                      .headers(HEADER_SSE.to_owned())
-                                      .send()
-                                      .await?
-                                      .text()).await??;
+              order=&begin={}&end={}&_=1631509021915",
+            self.begin, self.end
+        );
+        let text = tokio::spawn(
+            client
+                .get(url)
+                .headers(HEADER_SSE.to_owned())
+                .send()
+                .await?
+                .text(),
+        )
+        .await??;
         println!("{text}");
         if self.json {
             // jQuery1124043835116035075705_1631539496628()
@@ -112,11 +125,15 @@ impl Official {
 
     pub async fn sh(&self) -> Result<()> {
         let client = reqwest::Client::new();
-        let text = tokio::spawn(client.get(self.link.as_ref().ok_or(anyhow!("请检查网址！"))?)
-                                      .headers(HEADER_SSE.to_owned())
-                                      .send()
-                                      .await?
-                                      .text()).await??;
+        let text = tokio::spawn(
+            client
+                .get(self.link.as_ref().ok_or(anyhow!("请检查网址！"))?)
+                .headers(HEADER_SSE.to_owned())
+                .send()
+                .await?
+                .text(),
+        )
+        .await??;
         println!("{text}");
         if self.json {
             // jQuery1124043835116035075705_1631539496628()
@@ -128,11 +145,15 @@ impl Official {
 
     pub async fn sz(&self) -> Result<()> {
         let client = reqwest::Client::new();
-        let text = tokio::spawn(client.get(self.link.as_ref().ok_or(anyhow!("请检查网址！"))?)
-                                      .headers(HEADER_SZSE.to_owned())
-                                      .send()
-                                      .await?
-                                      .text()).await??;
+        let text = tokio::spawn(
+            client
+                .get(self.link.as_ref().ok_or(anyhow!("请检查网址！"))?)
+                .headers(HEADER_SZSE.to_owned())
+                .send()
+                .await?
+                .text(),
+        )
+        .await??;
         println!("{text}");
         if self.json {
             // jQuery1124043835116035075705_1631539496628()
@@ -161,10 +182,10 @@ impl Official {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ShMarket {
     begin: u16,
-    date:  u32,
-    end:   u16,
-    list:  Vec<ShMarketTable>,
-    time:  u32,
+    date: u32,
+    end: u16,
+    list: Vec<ShMarketTable>,
+    time: u32,
     total: u16,
 }
 
@@ -178,31 +199,31 @@ pub enum Category {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ShMarketTable {
     /// 6 位数字的股票代码
-    pub code:     String,
+    pub code: String,
     /// 股票名称
-    pub name:     String,
+    pub name: String,
     /// 开盘价
-    pub open:     f64,
+    pub open: f64,
     /// 最高价
-    pub high:     f64,
+    pub high: f64,
     /// 最低价
-    pub low:      f64,
+    pub low: f64,
     /// 最新价（收盘之后为收盘价）
-    pub close:    f64,
+    pub close: f64,
     /// 昨收
     pub preclose: f64,
     /// 涨跌幅（收盘-昨收） / 昨收 * 100
-    pub pct:      f64,
+    pub pct: f64,
     /// 成交量（vol/100 的单位为手）
-    pub vol:      u64,
+    pub vol: u64,
     /// 成交额（元）
-    pub amount:   f64,
+    pub amount: f64,
     // /// 常量？ "E110"
     // pub e110:     String,
     /// 涨跌（收盘或者说最新价-昨收）
-    pub change:   f64,
+    pub change: f64,
     /// 振幅（当日最高-当日最低） / 昨收 * 100
-    pub vibr:     f64,
+    pub vibr: f64,
     /// 股票类型：`ASH` | `KSH` | `BSH`
     pub category: Category,
     // /// 常量？ "   D  F             "
@@ -211,7 +232,7 @@ pub struct ShMarketTable {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SzMarket {
-    pub data:     Vec<SzMarketTable>,
+    pub data: Vec<SzMarketTable>,
     pub metadata: SzMetaData,
 }
 
@@ -230,29 +251,29 @@ pub struct SzMarket {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SzMarketTable {
     #[serde(deserialize_with = "comma_str_to_float", rename = "cjgs")]
-    pub vol:      f64,
+    pub vol: f64,
     #[serde(deserialize_with = "comma_str_to_float", rename = "cjje")]
-    pub amount:   f64,
+    pub amount: f64,
     #[serde(rename = "jyrq")]
-    pub date:     String,
+    pub date: String,
     #[serde(deserialize_with = "str_to_float", rename = "ks")]
-    pub open:     f64,
+    pub open: f64,
     #[serde(deserialize_with = "str_to_float", rename = "qss")]
     pub preclose: f64,
     #[serde(deserialize_with = "str_to_float", rename = "sdf")]
-    pub pct:      f64,
+    pub pct: f64,
     #[serde(deserialize_with = "str_to_float", rename = "ss")]
-    pub close:    f64,
+    pub close: f64,
     #[serde(deserialize_with = "str_to_float")]
-    pub syl1:     f64,
+    pub syl1: f64,
     #[serde(deserialize_with = "str_to_float", rename = "zd")]
-    pub low:      f64,
+    pub low: f64,
     #[serde(deserialize_with = "str_to_float", rename = "zg")]
-    pub high:     f64,
+    pub high: f64,
     #[serde(rename = "zqdm")]
-    pub code:     String,
+    pub code: String,
     #[serde(rename = "zqjc")]
-    pub name:     String,
+    pub name: String,
 }
 
 fn str_to_float<'de, D: Deserializer<'de>>(des: D) -> Result<f64, D::Error> {
@@ -261,10 +282,11 @@ fn str_to_float<'de, D: Deserializer<'de>>(des: D) -> Result<f64, D::Error> {
 
 /// 注意，把单位改成了元。成交量和成交额数据具有误差，因为原始数据就是失真的。
 fn comma_str_to_float<'de, D: Deserializer<'de>>(des: D) -> Result<f64, D::Error> {
-    <&str>::deserialize(des)?.replace(',', "")
-                             .parse()
-                             .map_err(de::Error::custom)
-                             .map(|d: f64| 10000. * d)
+    <&str>::deserialize(des)?
+        .replace(',', "")
+        .parse()
+        .map_err(de::Error::custom)
+        .map(|d: f64| 10000. * d)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -272,9 +294,9 @@ pub struct SzMetaData {
     /// 股票总数
     pub recordcount: u16,
     /// 当前页码
-    pub pageno:      u16,
+    pub pageno: u16,
     /// 总页数
-    pub pagecount:   u16,
+    pub pagecount: u16,
     /// 副标题。时间："2021-09-13 到 2021-09-13"
-    pub subname:     String,
+    pub subname: String,
 }

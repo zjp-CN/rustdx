@@ -9,10 +9,11 @@ fn example() -> Result<(), Box<dyn Error>> {
     //     let record: Factor = result?;
     //     println!("{:?}", record);
     // }
-    let hm: std::collections::HashMap<_, _> = rdr.deserialize()
-                                                 .filter_map(|f| f.ok())
-                                                 .map(|f: Factor| (f.code.clone(), f))
-                                                 .collect();
+    let hm: std::collections::HashMap<_, _> = rdr
+        .deserialize()
+        .filter_map(|f| f.ok())
+        .map(|f: Factor| (f.code.clone(), f))
+        .collect();
     println!("{:?}", hm);
     Ok(())
 }

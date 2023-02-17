@@ -6,12 +6,12 @@ use tokio::sync::{mpsc, oneshot};
 #[derive(Debug)]
 enum Command {
     Get {
-        key:  String,
+        key: String,
         resp: Responder<Option<Bytes>>,
     },
     Set {
-        key:  String,
-        val:  Vec<u8>,
+        key: String,
+        val: Vec<u8>,
         resp: Responder<()>,
     },
 }
@@ -50,8 +50,10 @@ async fn main() {
     // set.
     let t1 = tokio::spawn(async move {
         let (resp_tx, resp_rx) = oneshot::channel();
-        let cmd = Command::Get { key:  "foo".to_string(),
-                                 resp: resp_tx, };
+        let cmd = Command::Get {
+            key: "foo".to_string(),
+            resp: resp_tx,
+        };
 
         // Send the GET request
         if tx.send(cmd).await.is_err() {
@@ -66,9 +68,11 @@ async fn main() {
 
     let t2 = tokio::spawn(async move {
         let (resp_tx, resp_rx) = oneshot::channel();
-        let cmd = Command::Set { key:  "foo".to_string(),
-                                 val:  b"bar".to_vec(),
-                                 resp: resp_tx, };
+        let cmd = Command::Set {
+            key: "foo".to_string(),
+            val: b"bar".to_vec(),
+            resp: resp_tx,
+        };
 
         // Send the SET request
         if tx2.send(cmd).await.is_err() {
