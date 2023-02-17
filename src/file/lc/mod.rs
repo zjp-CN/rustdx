@@ -6,15 +6,15 @@ use std::path::Path;
 /// 所以日期 `date` 和股票代码 `code` 都是 `u32` 类型，
 #[derive(Debug, Clone, Copy)]
 pub struct Lc {
-    pub date:   u16,
-    pub min:    u16,
-    pub code:   u32,
-    pub open:   f32,
-    pub high:   f32,
-    pub low:    f32,
-    pub close:  f32,
+    pub date: u16,
+    pub min: u16,
+    pub code: u32,
+    pub open: f32,
+    pub high: f32,
+    pub low: f32,
+    pub close: f32,
     pub amount: f32,
-    pub vol:    u32,
+    pub vol: u32,
 }
 
 impl Lc {
@@ -44,34 +44,41 @@ impl Lc {
     /// | 分   | y % 60            |
     pub fn from_bytes(code: u32, arr: &[u8]) -> Self {
         use crate::bytes_helper::{f32_from_le_bytes, u16_from_le_bytes, u32_from_le_bytes};
-        Self { date: u16_from_le_bytes(arr, 0),
-               min: u16_from_le_bytes(arr, 2),
-               open: f32_from_le_bytes(arr, 4),
-               high: f32_from_le_bytes(arr, 8),
-               low: f32_from_le_bytes(arr, 12),
-               close: f32_from_le_bytes(arr, 16),
-               amount: f32_from_le_bytes(arr, 20),
-               vol: u32_from_le_bytes(arr, 24),
-               code }
+        Self {
+            date: u16_from_le_bytes(arr, 0),
+            min: u16_from_le_bytes(arr, 2),
+            open: f32_from_le_bytes(arr, 4),
+            high: f32_from_le_bytes(arr, 8),
+            low: f32_from_le_bytes(arr, 12),
+            close: f32_from_le_bytes(arr, 16),
+            amount: f32_from_le_bytes(arr, 20),
+            vol: u32_from_le_bytes(arr, 24),
+            code,
+        }
     }
 
     /// 一次性以**同步**方式读取单个 `*.lc` 文件所有数据，然后转化成 Vec。
     pub fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Lc>> {
-        Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
+        Ok(std::fs::read(p)?
+            .chunks_exact(32)
+            .map(|b| Self::from_bytes(code, b))
+            .collect())
     }
 
     /// 转化成用于（反）序列化的数据类型：
     /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
     #[cfg(feature = "serde")]
     pub fn into_serde_type(self) -> LcSerde {
-        LcSerde { datetime: self.datetime_string(),
-                  code:     format!("{:06}", self.code),
-                  open:     self.open,
-                  high:     self.high,
-                  low:      self.low,
-                  close:    self.close,
-                  amount:   self.amount,
-                  vol:      self.vol, }
+        LcSerde {
+            datetime: self.datetime_string(),
+            code: format!("{:06}", self.code),
+            open: self.open,
+            high: self.high,
+            low: self.low,
+            close: self.close,
+            amount: self.amount,
+            vol: self.vol,
+        }
     }
 
     pub fn datetime_string(&self) -> String {
@@ -93,15 +100,17 @@ impl Lc {
         [x / 2048 + 2004, x % 2048 / 100, x % 2048 % 100]
     }
 
-    pub fn hm_arr(&self) -> [u16; 2] { [self.min / 60, self.min % 60] }
+    pub fn hm_arr(&self) -> [u16; 2] {
+        [self.min / 60, self.min % 60]
+    }
 
     /// chrono 格式的日期：用于某些序列化或者与时间相关的计算
     #[cfg(feature = "chrono")]
     pub fn datetime(&self) -> chrono::naive::NaiveDateTime {
         let [y, m, d] = self.ymd_arr();
         let [h, min] = self.hm_arr();
-        chrono::naive::NaiveDate::from_ymd(y as i32, m as u32, d as u32).and_hms(h as u32,
-                                                                                 min as u32, 0)
+        chrono::naive::NaiveDate::from_ymd(y as i32, m as u32, d as u32)
+            .and_hms(h as u32, min as u32, 0)
     }
 }
 
@@ -113,11 +122,11 @@ impl Lc {
 pub struct LcSerde {
     /// `date` 为 `%Y-%m-%d H:M` 文本格式
     pub datetime: String,
-    pub code:     String,
-    pub open:     f32,
-    pub high:     f32,
-    pub low:      f32,
-    pub close:    f32,
-    pub amount:   f32,
-    pub vol:      u32,
+    pub code: String,
+    pub open: f32,
+    pub high: f32,
+    pub low: f32,
+    pub close: f32,
+    pub amount: f32,
+    pub vol: u32,
 }

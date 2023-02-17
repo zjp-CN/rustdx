@@ -205,8 +205,8 @@ pub struct ShMarketTable {
     pub vibr:     f64,
     /// 股票类型：`ASH` | `KSH` | `BSH`
     pub category: Category,
-    /* /// 常量？ "   D  F             "
-     * pub df:       String, */
+    // /// 常量？ "   D  F             "
+    // pub df:       String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -16,12 +16,12 @@ pub type StockGbbq<'a> = HashMap<u32, Vec<Gbbq<'a>>>;
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Gbbq<'a> {
-    pub market:   u8,
+    pub market: u8,
     /// 6 位股票代码
-    pub code:     &'a str,
+    pub code: &'a str,
     /// 日期
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_date_string"))]
-    pub date:     u32,
+    pub date: u32,
     /// 信息类型
     ///
     /// |   | 类别                           |    | 类别                                    |
@@ -48,26 +48,28 @@ pub struct Gbbq<'a> {
     /// ```
     pub category: u8,
     /// 分红（每 10 股派现金 x 元）| 前流通盘：
-    pub fh_qltp:  f32,
+    pub fh_qltp: f32,
     /// 配股价（每股配股价 x 元）| 前总股本
     pub pgj_qzgb: f32,
     /// 送转股（每 10 股送转股比例 x 股） | 后流通盘
-    pub sg_hltp:  f32,
+    pub sg_hltp: f32,
     /// 配股（每 10 股配股比例 x 股）| 后总股本：
-    pub pg_hzgb:  f32,
+    pub pg_hzgb: f32,
 }
 
 impl<'a> Gbbq<'a> {
     #[inline]
     pub fn from_chunk(chunk: &'a [u8]) -> Gbbq {
-        Self { market:   u8_from_le_bytes(chunk, 0),
-               code:     unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) },
-               date:     u32_from_le_bytes(chunk, 8),
-               category: u8_from_le_bytes(chunk, 12),
-               fh_qltp:  f32_from_le_bytes(chunk, 13),
-               pgj_qzgb: f32_from_le_bytes(chunk, 17),
-               sg_hltp:  f32_from_le_bytes(chunk, 21),
-               pg_hzgb:  f32_from_le_bytes(chunk, 25), }
+        Self {
+            market: u8_from_le_bytes(chunk, 0),
+            code: unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) },
+            date: u32_from_le_bytes(chunk, 8),
+            category: u8_from_le_bytes(chunk, 12),
+            fh_qltp: f32_from_le_bytes(chunk, 13),
+            pgj_qzgb: f32_from_le_bytes(chunk, 17),
+            sg_hltp: f32_from_le_bytes(chunk, 21),
+            pg_hzgb: f32_from_le_bytes(chunk, 25),
+        }
     }
 
     // 未解密二进制数据转化成 [`Gbbq`]
@@ -85,8 +87,8 @@ impl<'a> Gbbq<'a> {
     pub fn compute_pre_pct(&self, close: f32, mut preclose: f64, flag: bool) -> [f64; 3] {
         if flag {
             preclose = (preclose * 10. - self.fh_qltp as f64
-                        + self.pg_hzgb as f64 * self.pgj_qzgb as f64)
-                       / (10. + self.pg_hzgb as f64 + self.sg_hltp as f64)
+                + self.pg_hzgb as f64 * self.pgj_qzgb as f64)
+                / (10. + self.pg_hzgb as f64 + self.sg_hltp as f64)
         }
 
         let close = close as f64;
@@ -101,26 +103,26 @@ impl<'a> Gbbq<'a> {
         let mut vec = Vec::with_capacity(128); // 目前最多变更纪录的股票才不到 100 条记录
         let mut hm = HashMap::with_capacity(5000); // 目前 4000 多只 A 股
         gbbq.filter(|g| {
-                g.code
-                 .chars()
-                 .take(1)
-                 .map(|c| c == '6' || c == '0' || c == '3') // gbbq 包含非 A 股代码的数据
-                 .next()
-                 .unwrap_or(false)
+            g.code
+                .chars()
+                .take(1)
+                .map(|c| c == '6' || c == '0' || c == '3') // gbbq 包含非 A 股代码的数据
+                .next()
+                .unwrap_or(false)
                 && g.category == 1 // 只需要 A 股股票和分红等信息
-            })
-            .map(|g| {
-                let c = g.code.parse().unwrap();
-                if c != code {
-                    hm.insert(code, vec.clone()); // TODO: 优化这里的 clone
-                    code = c;
-                    vec.clear();
-                    vec.push(g);
-                } else {
-                    vec.push(g);
-                }
-            })
-            .last();
+        })
+        .map(|g| {
+            let c = g.code.parse().unwrap();
+            if c != code {
+                hm.insert(code, vec.clone()); // TODO: 优化这里的 clone
+                code = c;
+                vec.clear();
+                vec.push(g);
+            } else {
+                vec.push(g);
+            }
+        })
+        .last();
         hm.insert(code, vec); // 插入最后一个股票
         hm.remove(&0);
         hm
@@ -129,12 +131,12 @@ impl<'a> Gbbq<'a> {
 
 ///
 pub struct Gbbqs {
-    data:       Vec<u8>,
+    data: Vec<u8>,
     /// 股本变迁的记录条数。这个数据在读取 `gbbq` 文件时就已经被解析了。
     /// 因为该文件前 4 个字节的含义就是记录条数。
     ///
     /// 注：`gbbq` 的二进制字节长度 = 4 + count * 29
-    pub count:  usize,
+    pub count: usize,
     /// 是否已经解密。
     pub parsed: bool,
 }
@@ -143,9 +145,11 @@ impl Gbbqs {
     pub fn from_file(p: impl AsRef<std::path::Path>) -> Result<Self> {
         let vec = std::fs::read(p)?;
         let count = u32_from_le_bytes(&vec[..4], 0) as usize;
-        Ok(Self { data: vec,
-                  count,
-                  parsed: false })
+        Ok(Self {
+            data: vec,
+            count,
+            parsed: false,
+        })
     }
 
     /// 产生 [`Gbbq`] 的 `Vec` 。
@@ -157,13 +161,17 @@ impl Gbbqs {
     ///    的结果为解密后的二进制数据。
     pub fn to_vec(&mut self) -> Vec<Gbbq> {
         if self.parsed {
-            self.data[4..].chunks_exact(29).map(Gbbq::from_chunk).collect()
+            self.data[4..]
+                .chunks_exact(29)
+                .map(Gbbq::from_chunk)
+                .collect()
         } else {
-            let res = self.data[4..].chunks_exact_mut(29)
-                                    .map(parse)
-                                    .map(Gbbq::from_chunk)
-                                    // .map(Gbbq::from_chunk_mut)
-                                    .collect();
+            let res = self.data[4..]
+                .chunks_exact_mut(29)
+                .map(parse)
+                .map(Gbbq::from_chunk)
+                // .map(Gbbq::from_chunk_mut)
+                .collect();
             self.parsed = true;
             res
         }
@@ -175,11 +183,15 @@ impl Gbbqs {
     /// 3. 此二进制数据的引用已剔除前 4 个字节，
     ///    因为这四个字节只表示该 `gbbq` 文件所含的记录条数，
     ///    如果需要知道这个条数，请调用 `.count` 。
-    pub fn get_data(&self) -> &[u8] { &self.data[4..] }
+    pub fn get_data(&self) -> &[u8] {
+        &self.data[4..]
+    }
 
     /// 获取 `gbbq` 文件的二进制数据的独占引用，
     /// 除了引用类型的区别外，与 [`Gbbqs::get_data`] 无区别。
-    pub fn get_data_mut(&mut self) -> &mut [u8] { &mut self.data[4..] }
+    pub fn get_data_mut(&mut self) -> &mut [u8] {
+        &mut self.data[4..]
+    }
 }
 
 /// 加密数据必须分成 29 个 u8 为一组，每次解析一组。

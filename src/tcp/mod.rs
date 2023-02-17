@@ -26,14 +26,18 @@ pub type BufTcp = BufReader<TcpStream>;
 pub struct Tcp {
     stream: TcpStream,
     buffer: BufTcp,
-    recv:   [u8; RECV_SIZE],
+    recv: [u8; RECV_SIZE],
 }
 
 impl Tcp {
     /// 已发送三个测试包
     pub fn new() -> Result<Self> {
         let (stream, buffer, recv) = tcpstream()?;
-        let mut tcp = Self { stream, buffer, recv };
+        let mut tcp = Self {
+            stream,
+            buffer,
+            recv,
+        };
         send_packs(&mut tcp, false)?;
         Ok(tcp)
     }
@@ -41,7 +45,11 @@ impl Tcp {
     /// 已发送三个测试包
     pub fn new_with_ip(ip: &SocketAddr) -> Result<Self> {
         let (stream, buffer, recv) = tcpstream_ip(ip)?;
-        let mut tcp = Self { stream, buffer, recv };
+        let mut tcp = Self {
+            stream,
+            buffer,
+            recv,
+        };
         send_packs(&mut tcp, false)?;
         Ok(tcp)
     }
@@ -64,7 +72,9 @@ impl Tcp {
         (&self.stream, &self.buffer, &self.recv)
     }
 
-    pub fn get_ref_recv(&self) -> &[u8] { &self.recv }
+    pub fn get_ref_recv(&self) -> &[u8] {
+        &self.recv
+    }
 }
 
 pub trait Tdx {
