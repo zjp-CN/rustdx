@@ -9,10 +9,10 @@ use crate::bytes_helper::{u16_from_le_bytes, u32_from_le_bytes};
 /// 注意：默认 15 时（即 `DateTime::default().hour == 15`）。
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct DateTime {
-    pub year:   u16,
-    pub month:  u16,
-    pub day:    u16,
-    pub hour:   u16,
+    pub year: u16,
+    pub month: u16,
+    pub day: u16,
+    pub hour: u16,
     pub minute: u16,
 }
 
@@ -25,8 +25,10 @@ impl Default for DateTime {
 impl DateTime {
     pub fn into_string(self, category: u16) -> String {
         match category {
-            0..=3 | 7 | 8 => format!("{:04}-{:02}-{:02} {:02}:{:02}",
-                                     self.year, self.month, self.day, self.hour, self.minute),
+            0..=3 | 7 | 8 => format!(
+                "{:04}-{:02}-{:02} {:02}:{:02}",
+                self.year, self.month, self.day, self.hour, self.minute
+            ),
             _ => format!("{:04}-{:02}-{:02}", self.year, self.month, self.day),
         }
     }
@@ -82,7 +84,11 @@ pub fn price(arr: &[u8], pos: &mut usize) -> i32 {
     }
     *pos += 1;
 
-    if sign { res } else { -res }
+    if sign {
+        res
+    } else {
+        -res
+    }
 }
 
 pub fn vol_amount(ivol: i32) -> f64 {
@@ -95,7 +101,11 @@ pub fn vol_amount(ivol: i32) -> f64 {
     let dw_esi = logpoint * 2 - 0x8e;
     let dw_eax = logpoint * 2 - 0x96;
 
-    let dbl_xmm6 = if dw_ecx < 0 { 1.0 / 2.0f64.powi(-dw_ecx) } else { 2.0f64.powi(dw_ecx) };
+    let dbl_xmm6 = if dw_ecx < 0 {
+        1.0 / 2.0f64.powi(-dw_ecx)
+    } else {
+        2.0f64.powi(dw_ecx)
+    };
 
     let dbl_xmm4 = if hleax > 0x80 {
         2.0f64.powi(dw_edx) * 128.0 + (hleax & 0x7f) as f64 * 2.0f64.powi(dw_edx + 1)
@@ -106,9 +116,15 @@ pub fn vol_amount(ivol: i32) -> f64 {
     };
 
     let (dbl_xmm3, dbl_xmm1) = if (hleax & 0x80) != 0 {
-        (2.0f64.powi(dw_esi + 1) * lheax as f64, 2.0f64.powi(dw_eax + 1) * lleax as f64)
+        (
+            2.0f64.powi(dw_esi + 1) * lheax as f64,
+            2.0f64.powi(dw_eax + 1) * lleax as f64,
+        )
     } else {
-        (2.0f64.powi(dw_esi) * lheax as f64, 2.0f64.powi(dw_eax) * lleax as f64)
+        (
+            2.0f64.powi(dw_esi) * lheax as f64,
+            2.0f64.powi(dw_eax) * lleax as f64,
+        )
     };
 
     // dbg!(dbl_xmm6, dbl_xmm4, dbl_xmm3, dbl_xmm1);

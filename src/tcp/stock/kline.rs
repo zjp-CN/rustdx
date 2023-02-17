@@ -20,14 +20,14 @@ use crate::tcp::{helper::DateTime, Tdx};
 /// 比如修改股票代码调用 [`Kline::code`]，修改查询数量调用 [`Kline::count`]。
 #[derive(Debug, Clone)]
 pub struct Kline<'d> {
-    pub send:     Box<[u8]>,
-    pub market:   u16,
-    pub code:     &'d str,
+    pub send: Box<[u8]>,
+    pub market: u16,
+    pub code: &'d str,
     pub category: u16,
-    pub start:    u16,
-    pub count:    u16,
+    pub start: u16,
+    pub count: u16,
     pub response: Vec<u8>,
-    pub data:     Vec<KlineData<'d>>,
+    pub data: Vec<KlineData<'d>>,
 }
 
 /// 为了对应 [`Kline::SEND`] 的含义，以下默认值值得注意：
@@ -121,13 +121,16 @@ impl<'a> Tdx for Kline<'a> {
     /// ```python
     /// struct.pack("<HIHHHH6sHHHHIIH", bytes) # python 中的解读方式
     /// ```
-    const SEND: &'static [u8] = &[0x0c, 0x01, 0x08, 0x64, 0x01, 0x01, 0x1c, 0x00, 0x1c, 0x00,
-                                  0x2d, 0x05, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 0x31,
-                                  0x09, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00,
-                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    const SEND: &'static [u8] = &[
+        0x0c, 0x01, 0x08, 0x64, 0x01, 0x01, 0x1c, 0x00, 0x1c, 0x00, 0x2d, 0x05, 0x00, 0x00, 0x30,
+        0x30, 0x30, 0x30, 0x30, 0x31, 0x09, 0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    ];
     const TAG: &'static str = "日线";
 
-    fn send(&mut self) -> &[u8] { &self.send }
+    fn send(&mut self) -> &[u8] {
+        &self.send
+    }
 
     #[rustfmt::skip]
     fn parse(&mut self, v: Vec<u8>) {
@@ -157,19 +160,21 @@ impl<'a> Tdx for Kline<'a> {
         self.response = v;
     }
 
-    fn result(&self) -> &Self::Item { &self.data }
+    fn result(&self) -> &Self::Item {
+        &self.data
+    }
 }
 
 #[derive(Debug, Default, Clone, serde::Serialize)]
 pub struct KlineData<'d> {
-    pub dt:     DateTime,
-    pub code:   &'d str,
-    pub open:   f64,
-    pub close:  f64,
-    pub high:   f64,
-    pub low:    f64,
+    pub dt: DateTime,
+    pub code: &'d str,
+    pub open: f64,
+    pub close: f64,
+    pub high: f64,
+    pub low: f64,
     /// 成交量，单位：股
-    pub vol:    f64,
+    pub vol: f64,
     /// 成交额，单位：元
     pub amount: f64,
 }
@@ -202,7 +207,9 @@ pub struct KlineData<'d> {
 // }
 
 #[inline]
-fn real_price(p: i32, base: i32) -> f64 { (p + base) as f64 / 1000. }
+fn real_price(p: i32, base: i32) -> f64 {
+    (p + base) as f64 / 1000.
+}
 
 #[test]
 fn day_new_modify() {
@@ -213,52 +220,70 @@ fn day_new_modify() {
 }
 
 #[test]
-fn connection() -> std::io::Result<()> { crate::tcp::tests::connection(Kline::default()) }
+fn connection() -> std::io::Result<()> {
+    crate::tcp::tests::connection(Kline::default())
+}
 
 #[test]
 fn parse() {
     let mut day = Kline::default();
-    let arr = vec![0x03, 0x00, 0xeb, 0x64, 0x34, 0x01, 0xb4, 0x9a, 0x02, 0xe4, 0x06, 0x9c, 0x03,
-                   0xc2, 0x07, 0xe8, 0x6f, 0xa8, 0x49, 0x59, 0xf7, 0x12, 0x4f, 0xec, 0x64, 0x34,
-                   0x01, 0xd0, 0x01, 0xfa, 0x03, 0x90, 0x01, 0xc4, 0x04, 0x00, 0x81, 0x9a, 0x49,
-                   0xb7, 0xb1, 0x03, 0x4f, 0xef, 0x64, 0x34, 0x01, 0xcc, 0x02, 0xa8, 0x05, 0x96,
-                   0x07, 0xd6, 0x02, 0xd8, 0x3d, 0x8b, 0x49, 0x4b, 0xf0, 0xeb, 0x4e];
-    let res = [KlineData { dt:     DateTime { year:   2021,
-                                              month:  9,
-                                              day:    23,
-                                              hour:   15,
-                                              minute: 0, },
-                           code:   "000001",
-                           open:   18.1,
-                           close:  17.68,
-                           high:   18.32,
-                           low:    17.65,
-                           vol:    1379837.0,
-                           amount: 2465683712.0, },
-               KlineData { dt:     DateTime { year:   2021,
-                                              month:  9,
-                                              day:    24,
-                                              hour:   15,
-                                              minute: 0, },
-                           code:   "000001",
-                           open:   17.6,
-                           close:  17.35,
-                           high:   17.68,
-                           low:    17.34,
-                           vol:    1265696.0,
-                           amount: 2209462016.0, },
-               KlineData { dt:     DateTime { year:   2021,
-                                              month:  9,
-                                              day:    27,
-                                              hour:   15,
-                                              minute: 0, },
-                           code:   "000001",
-                           open:   17.21,
-                           close:  17.57,
-                           high:   17.68,
-                           low:    17.06,
-                           vol:    1140667.0,
-                           amount: 1979196800.0, }];
+    let arr = vec![
+        0x03, 0x00, 0xeb, 0x64, 0x34, 0x01, 0xb4, 0x9a, 0x02, 0xe4, 0x06, 0x9c, 0x03, 0xc2, 0x07,
+        0xe8, 0x6f, 0xa8, 0x49, 0x59, 0xf7, 0x12, 0x4f, 0xec, 0x64, 0x34, 0x01, 0xd0, 0x01, 0xfa,
+        0x03, 0x90, 0x01, 0xc4, 0x04, 0x00, 0x81, 0x9a, 0x49, 0xb7, 0xb1, 0x03, 0x4f, 0xef, 0x64,
+        0x34, 0x01, 0xcc, 0x02, 0xa8, 0x05, 0x96, 0x07, 0xd6, 0x02, 0xd8, 0x3d, 0x8b, 0x49, 0x4b,
+        0xf0, 0xeb, 0x4e,
+    ];
+    let res = [
+        KlineData {
+            dt: DateTime {
+                year: 2021,
+                month: 9,
+                day: 23,
+                hour: 15,
+                minute: 0,
+            },
+            code: "000001",
+            open: 18.1,
+            close: 17.68,
+            high: 18.32,
+            low: 17.65,
+            vol: 1379837.0,
+            amount: 2465683712.0,
+        },
+        KlineData {
+            dt: DateTime {
+                year: 2021,
+                month: 9,
+                day: 24,
+                hour: 15,
+                minute: 0,
+            },
+            code: "000001",
+            open: 17.6,
+            close: 17.35,
+            high: 17.68,
+            low: 17.34,
+            vol: 1265696.0,
+            amount: 2209462016.0,
+        },
+        KlineData {
+            dt: DateTime {
+                year: 2021,
+                month: 9,
+                day: 27,
+                hour: 15,
+                minute: 0,
+            },
+            code: "000001",
+            open: 17.21,
+            close: 17.57,
+            high: 17.68,
+            low: 17.06,
+            vol: 1140667.0,
+            amount: 1979196800.0,
+        },
+    ];
     day.parse(arr);
     compare!(res, day.data.as_slice());
 }

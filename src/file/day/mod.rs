@@ -21,21 +21,23 @@ pub mod fq;
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Day {
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_date_string"))]
-    pub date:   u32,
+    pub date: u32,
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_code_string"))]
-    pub code:   u32,
-    pub open:   f32,
-    pub high:   f32,
-    pub low:    f32,
-    pub close:  f32,
+    pub code: u32,
+    pub open: f32,
+    pub high: f32,
+    pub low: f32,
+    pub close: f32,
     pub amount: f32,
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_vol"))]
-    pub vol:    u32,
+    pub vol: u32,
 }
 
 #[cfg(feature = "serde")]
 fn ser_vol<S>(vol: &u32, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer {
+where
+    S: Serializer,
+{
     serializer.serialize_f32(*vol as f32 / 100.)
 }
 
@@ -63,23 +65,30 @@ impl Day {
     /// 日：20210810%10000%100 = 10
     pub fn from_bytes(code: u32, arr: &[u8]) -> Self {
         use crate::bytes_helper::{f32_from_le_bytes, u32_from_le_bytes};
-        Self { date: u32_from_le_bytes(arr, 0),
-               open: u32_from_le_bytes(arr, 4) as f32 / 100.,
-               high: u32_from_le_bytes(arr, 8) as f32 / 100.,
-               low: u32_from_le_bytes(arr, 12) as f32 / 100.,
-               close: u32_from_le_bytes(arr, 16) as f32 / 100.,
-               amount: f32_from_le_bytes(arr, 20),
-               vol: u32_from_le_bytes(arr, 24),
-               code }
+        Self {
+            date: u32_from_le_bytes(arr, 0),
+            open: u32_from_le_bytes(arr, 4) as f32 / 100.,
+            high: u32_from_le_bytes(arr, 8) as f32 / 100.,
+            low: u32_from_le_bytes(arr, 12) as f32 / 100.,
+            close: u32_from_le_bytes(arr, 16) as f32 / 100.,
+            amount: f32_from_le_bytes(arr, 20),
+            vol: u32_from_le_bytes(arr, 24),
+            code,
+        }
     }
 
     /// 一次性以**同步**方式读取单个 `*.day` 文件所有数据，然后转化成 Vec。
     pub fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> crate::Result<Vec<Day>> {
-        Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
+        Ok(std::fs::read(p)?
+            .chunks_exact(32)
+            .map(|b| Self::from_bytes(code, b))
+            .collect())
     }
 
     /// `%Y-%m-%d` 格式的日期
-    pub fn date_string(&self) -> String { crate::bytes_helper::date_string(self.date) }
+    pub fn date_string(&self) -> String {
+        crate::bytes_helper::date_string(self.date)
+    }
 
     /// `[年, 月, 日]` 格式的日期
     pub fn ymd_arr(&self) -> [u32; 3] {

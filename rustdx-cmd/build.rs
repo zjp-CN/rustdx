@@ -20,5 +20,6 @@ fn main() {
     let version = get_git_version();
     let p = Path::new(&var("OUT_DIR").expect("no `OUT_DIR`")).join("VERSION");
     let mut f = File::create(p).unwrap_or_else(|_| panic!("{}", "{p:?} not created"));
-    f.write_all(version.trim().as_bytes()).unwrap_or_else(|_| panic!("{}", "{p:?} not written"));
+    f.write_all(version.trim().as_bytes())
+     .unwrap_or_else(|_| panic!("{}", "{p:?} not written"));
 }

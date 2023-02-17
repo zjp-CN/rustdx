@@ -5,42 +5,49 @@ use std::path::Path;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Day {
     /// `date` 为 `%Y-%m-%d` 文本格式
-    pub date:   String,
-    pub code:   String,
-    pub open:   f32,
-    pub high:   f32,
-    pub low:    f32,
-    pub close:  f32,
+    pub date: String,
+    pub code: String,
+    pub open: f32,
+    pub high: f32,
+    pub low: f32,
+    pub close: f32,
     pub amount: f32,
-    pub vol:    f32,
+    pub vol: f32,
 }
 
 impl Day {
     #[inline]
     pub fn from_bytes(code: u32, arr: &[u8]) -> Self {
         use rustdx::file::day::Day as DayRaw;
-        let DayRaw { code,
-                     date,
-                     open,
-                     high,
-                     low,
-                     close,
-                     amount,
-                     vol, } = DayRaw::from_bytes(code, arr);
-        Self { code: format!("{code:06}"),
-               date: rustdx::bytes_helper::date_string(date),
-               open,
-               high,
-               low,
-               close,
-               // 单位：元
-               amount,
-               // 转换成手：方便与其他数据源汇合
-               vol: vol as f32 / 100. }
+        let DayRaw {
+            code,
+            date,
+            open,
+            high,
+            low,
+            close,
+            amount,
+            vol,
+        } = DayRaw::from_bytes(code, arr);
+        Self {
+            code: format!("{code:06}"),
+            date: rustdx::bytes_helper::date_string(date),
+            open,
+            high,
+            low,
+            close,
+            // 单位：元
+            amount,
+            // 转换成手：方便与其他数据源汇合
+            vol: vol as f32 / 100.,
+        }
     }
 
     pub fn from_file_into_vec<P: AsRef<Path>>(code: u32, p: P) -> rustdx::Result<Vec<Day>> {
-        Ok(std::fs::read(p)?.chunks_exact(32).map(|b| Self::from_bytes(code, b)).collect())
+        Ok(std::fs::read(p)?
+            .chunks_exact(32)
+            .map(|b| Self::from_bytes(code, b))
+            .collect())
     }
 }
 
