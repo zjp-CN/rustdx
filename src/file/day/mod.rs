@@ -100,6 +100,6 @@ impl Day {
     #[cfg(feature = "chrono")]
     pub fn ymd(&self) -> chrono::naive::NaiveDate {
         let [y, m, d] = self.ymd_arr();
-        chrono::naive::NaiveDate::from_ymd(y as i32, m, d)
+        chrono::naive::NaiveDate::from_ymd_opt(y as i32, m, d).unwrap()
     }
 }

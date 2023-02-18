@@ -190,6 +190,7 @@ pub struct ShMarket {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum Category {
     ASH,
     BSH,

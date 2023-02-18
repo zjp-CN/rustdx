@@ -29,8 +29,8 @@ optional = true
 features = ["fast-gb-hanzi-encode"]
 
 [features]
-default = ["file"]
-full    = ["file", "tcp", "encoding_rs"]
+default = ["full"]
+full    = ["file", "tcp", "encoding_rs", "chrono"]
 tcp     = ["miniz_oxide", "lazy_static", "serde", "log"]
 file    = []
 
