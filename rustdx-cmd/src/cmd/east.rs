@@ -20,8 +20,8 @@ pub struct East {
     #[argh(option, short = 'i')]
     pub ignore: Vec<String>,
 
-    /// 股票总个数，默认 4800。
-    #[argh(option, short = 'n', default = "4800")]
+    /// 股票总个数，默认 6000。
+    #[argh(option, short = 'n', default = "6000")]
     pub n: u16,
 
     /// 以 json 格式显示
