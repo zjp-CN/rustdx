@@ -245,11 +245,14 @@ pub fn previous_csv_table(path: &Option<std::path::PathBuf>, table: &str) -> Pre
 
 /// 读取前收盘价（前 factor ）数据
 pub fn previous_csv(p: impl AsRef<Path>) -> Previous {
-    Ok(csv::Reader::from_reader(File::open(p)?)
+    let path = p.as_ref();
+    let prev = csv::Reader::from_reader(File::open(path)?)
         .deserialize::<Factor>()
         .filter_map(|f| f.ok())
         .map(|f| (f.code.parse().unwrap(), f))
-        .collect())
+        .collect();
+    fs::remove_file(path)?;
+    Ok(prev)
 }
 
 /// 获取当前最新 factor
