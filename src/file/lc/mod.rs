@@ -107,10 +107,14 @@ impl Lc {
     /// chrono 格式的日期：用于某些序列化或者与时间相关的计算
     #[cfg(feature = "chrono")]
     pub fn datetime(&self) -> chrono::naive::NaiveDateTime {
+        use chrono::naive::NaiveDate;
+        const ERR: &str = "日期格式不对";
         let [y, m, d] = self.ymd_arr();
         let [h, min] = self.hm_arr();
-        chrono::naive::NaiveDate::from_ymd(y as i32, m as u32, d as u32)
-            .and_hms(h as u32, min as u32, 0)
+        NaiveDate::from_ymd_opt(y as i32, m as u32, d as u32)
+            .expect(ERR)
+            .and_hms_opt(h as u32, min as u32, 0)
+            .expect(ERR)
     }
 }
 

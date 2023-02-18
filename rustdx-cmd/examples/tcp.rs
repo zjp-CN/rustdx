@@ -12,7 +12,7 @@ fn main() -> Result<()> {
 
             println!(
                 "list len: {}",
-                tcp::stock::SecurityList::new().recv_parsed(&mut tcp)?.len()
+                tcp::SecurityList::new(0, 0).recv_parsed(&mut tcp)?.len()
             );
 
             break;

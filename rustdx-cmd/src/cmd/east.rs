@@ -202,7 +202,7 @@ pub enum F32<'a> {
 
 /// TODO： 最新的交易日，而不是当天
 fn default_date() -> String {
-    chrono::Local::today().format("%Y-%m-%d").to_string()
+    chrono::Local::now().format("%Y-%m-%d").to_string()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
