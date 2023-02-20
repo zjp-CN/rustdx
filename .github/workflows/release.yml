@@ -1,7 +1,9 @@
 # from: https://faun.pub/automate-your-build-release-with-github-actions-367c0febf5fd
 
 name: Release CI
-on: [push]
+on:
+  push:
+    branches: ["main"]
 jobs:
   deploy:
     # A strategy is used to define various build environments this job will run.
