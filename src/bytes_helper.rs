@@ -48,7 +48,6 @@ pub fn date_string(x: u32) -> String {
 }
 
 #[cfg(feature = "serde")]
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub fn ser_date_string<S>(date: &u32, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
@@ -57,7 +56,6 @@ where
 }
 
 #[cfg(feature = "serde")]
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub fn ser_code_string<S>(code: &u32, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
