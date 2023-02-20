@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.3.0 (2023-02-20)
+
+- 更新依赖
+- clippy fix
+- 改动 features
+- 命令行工具
+    - 从 clickhouse 获取 factor.csv 之后自动删除它
+    - 东财数据默认 6000 条
+
 ## [bin-v0.1.4](https://github.com/zjp-CN/rustdx/tree/bin-v0.1.4) (2021-12-01)
 
 [Full Changelog](https://github.com/zjp-CN/rustdx/compare/v0.2.4.beta1...bin-v0.1.4)
