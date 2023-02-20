@@ -1108,7 +1108,7 @@ dependencies = [
 
 [[package]]
 name = "rustdx"
-version = "0.2.5"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "csv",
@@ -1124,7 +1124,7 @@ dependencies = [
 
 [[package]]
 name = "rustdx-cmd"
-version = "0.1.5"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "argh",

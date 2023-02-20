@@ -1,6 +1,6 @@
 [package]
 name        = "rustdx-cmd"
-version     = "0.1.5"
+version     = "0.3.0"
 edition     = "2018"
 license     = "MIT"
 build       = "build.rs"
@@ -8,7 +8,10 @@ readme      = "../README.md"
 description = "受 pytdx 启发的 A 股数据获取库"
 repository  = "https://github.com/zjp-CN/rustdx"
 authors     = ["zjp <jiping_zhou@foxmail.com>"]
-exclude     = ["assets", "examples", "benches", "tests", "rustdx.log", "*.csv"]
+exclude     = [
+                "assets", "examples", "benches", "tests", "rustdx.log", "*.csv",
+                "LICENSE-MIT", "rustfmt.toml"
+              ]
 
 [dependencies]
 anyhow   = "1"
@@ -30,7 +33,7 @@ simplelog   = {version ="0.12", optional = true}
 miniz_oxide = {version ="0.7", optional = true}
 
 [dependencies.rustdx]
-version  = "0.2.5"
+version  = "0.3.0"
 optional = true
 path = "../"
 default-features = false
