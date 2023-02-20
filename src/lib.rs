@@ -5,10 +5,8 @@
 
 pub mod bytes_helper;
 
-#[cfg(feature = "file")]
 pub mod file;
 
-#[cfg(feature = "tcp")]
 pub mod tcp;
 
 use thiserror::Error;

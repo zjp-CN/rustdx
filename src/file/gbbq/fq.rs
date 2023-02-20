@@ -1,17 +1,15 @@
 use super::Gbbq;
 use crate::file::day::Day;
 
-#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct Factor {
     pub date: String,
     pub code: String,
-    #[cfg_attr(feature = "serde", serde(rename(deserialize = "close")))]
+    #[serde(rename(deserialize = "close"))]
     pub preclose: f64,
     pub factor: f64,
 }
 
-#[cfg(feature = "serde")]
 impl Factor {
     /// 根据前收、收盘价（最新价）和前一日的因子计算当日的复权因子。
     #[inline]

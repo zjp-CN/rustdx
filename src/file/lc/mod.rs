@@ -67,7 +67,6 @@ impl Lc {
 
     /// 转化成用于（反）序列化的数据类型：
     /// 6 位字符串的股票代码；%Y-%m-%d 字符串格式的日期；f64 类型的成交额；u64 类型的 vol 。
-    #[cfg(feature = "serde")]
     pub fn into_serde_type(self) -> LcSerde {
         LcSerde {
             datetime: self.datetime_string(),
@@ -105,7 +104,6 @@ impl Lc {
     }
 
     /// chrono 格式的日期：用于某些序列化或者与时间相关的计算
-    #[cfg(feature = "chrono")]
     pub fn datetime(&self) -> chrono::naive::NaiveDateTime {
         use chrono::naive::NaiveDate;
         const ERR: &str = "日期格式不对";
@@ -121,7 +119,6 @@ impl Lc {
 /// 用于序列化：比如写入到 csv
 ///
 /// 此结构体暂时待定，未来可能更改。
-#[cfg(feature = "serde")]
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct LcSerde {
     /// `date` 为 `%Y-%m-%d H:M` 文本格式

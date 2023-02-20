@@ -13,30 +13,22 @@ exclude     = [
               ]
 
 [dependencies]
-chrono  = {version = "0.4",     optional = true}
-lazy_static = {version = "1",   optional = true}
-miniz_oxide = {version = "0.7", optional = true}
+chrono  = {version = "0.4" }
+lazy_static = {version = "1" }
+miniz_oxide = {version = "0.7" }
 
 # anyhow = "1"
 thiserror = "1"
-log = {version = "0.4", optional = true}
+log = {version = "0.4" }
 
 [dependencies.serde]
 version  = "1"
-optional = true
 features = ["derive"]
 # default-features = false
 
 [dependencies.encoding_rs]
 version  = "0.8"
-optional = true
 features = ["fast-gb-hanzi-encode"]
-
-[features]
-default = ["full"]
-full    = ["file", "tcp", "encoding_rs", "chrono"]
-tcp     = ["miniz_oxide", "lazy_static", "serde", "log"]
-file    = []
 
 [dev-dependencies]
 # backtrace 是在 cargo test 无法并行的情况下 用于产生 test name （从而产生 snapshot name ）
