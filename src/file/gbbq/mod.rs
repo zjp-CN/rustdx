@@ -13,14 +13,13 @@ pub type StockGbbq<'a> = HashMap<u32, Vec<Gbbq<'a>>>;
 /// ## 注意
 /// 开启 `serde` feature 时，此结构体的序列化 (serialize) 时：
 /// `date` 为 `年-月-日` 格式。
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Gbbq<'a> {
     pub market: u8,
     /// 6 位股票代码
     pub code: &'a str,
     /// 日期
-    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_date_string"))]
+    #[serde(serialize_with = "ser_date_string")]
     pub date: u32,
     /// 信息类型
     ///

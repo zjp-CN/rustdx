@@ -1,6 +1,5 @@
 use std::path::Path;
 
-#[cfg(feature = "serde")]
 use {
     crate::bytes_helper::{ser_code_string, ser_date_string},
     serde::{Serialize, Serializer},
@@ -17,23 +16,21 @@ pub mod fq;
 /// 开启 `serde` feature 时，此结构体的序列化 (serialize) 时：
 /// 1. `date` 为 `年-月-日` 格式
 /// 2. `code` 为 6 位字符串的股票代码
-#[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct Day {
-    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_date_string"))]
+    #[serde(serialize_with = "ser_date_string")]
     pub date: u32,
-    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_code_string"))]
+    #[serde(serialize_with = "ser_code_string")]
     pub code: u32,
     pub open: f32,
     pub high: f32,
     pub low: f32,
     pub close: f32,
     pub amount: f32,
-    #[cfg_attr(feature = "serde", serde(serialize_with = "ser_vol"))]
+    #[serde(serialize_with = "ser_vol")]
     pub vol: u32,
 }
 
-#[cfg(feature = "serde")]
 fn ser_vol<S>(vol: &u32, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -97,7 +94,6 @@ impl Day {
     }
 
     /// chrono 格式的日期：用于某些序列化或者与时间相关的计算
-    #[cfg(feature = "chrono")]
     pub fn ymd(&self) -> chrono::naive::NaiveDate {
         let [y, m, d] = self.ymd_arr();
         chrono::naive::NaiveDate::from_ymd_opt(y as i32, m, d).unwrap()

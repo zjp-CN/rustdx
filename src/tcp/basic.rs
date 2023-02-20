@@ -115,7 +115,6 @@ impl SecurityList {
     }
 }
 
-#[cfg(feature = "encoding_rs")]
 impl Tdx for SecurityList {
     type Item = [SecurityListData];
 
@@ -176,7 +175,6 @@ impl SecurityListData {
     ///     reversed_bytes2,
     /// ) = struct.unpack("<6sH8s4sBI4s", bytes) # python 表示方式
     /// ```
-    #[cfg(feature = "encoding_rs")]
     pub fn parse(bytes: &[u8]) -> Self {
         let code = unsafe { std::str::from_utf8_unchecked(&bytes[0..6]) }.into();
         let (name, encoding_used, had_errors) = encoding_rs::GBK.decode(&bytes[8..16]);

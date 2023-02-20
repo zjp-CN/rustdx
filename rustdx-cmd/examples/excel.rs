@@ -44,7 +44,8 @@ enum Exchange {
     Szse,
 }
 
-fn read_excel(path: &str, ex: Exchange) -> Result<Sheets> {
+type Reader = std::io::BufReader<std::fs::File>;
+fn read_excel(path: &str, ex: Exchange) -> Result<Sheets<Reader>> {
     let now = Instant::now();
     let mut workbook = open_workbook_auto(&path)?;
     println!(
