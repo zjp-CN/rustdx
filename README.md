@@ -37,14 +37,15 @@
 
 2. cargo install：
 ```console
-$ CARGO_PROFILE_RELEASE_LTO=yes CARGO_PROFILE_RELEASE_OPT_LEVEL=3 cargo install rustdx-cmd
+cargo install rustdx-cmd
 ```
 
 3. cargo build：
 ```console
 $ git clone https://github.com/zjp-CN/rustdx.git
 $ cd rustdx
-$ cargo build -p rustdx-cmd --release
+$ cargo build -p rustdx-cmd --release # 编译（二进制在 target/release 下）
+$ cargo install --path rustdx-cmd     # 安装（二进制在全局 .cargo/bin 下）
 ```
 
 ### 子命令
