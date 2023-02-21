@@ -12,13 +12,7 @@ fn main() -> Result<()> {
     read_excel("../assets/xlsx/主板A股-sse.xlsx", Sse)?;
     read_excel("../assets/xlsx/主板A股-sse.xls", Sse)?;
 
-    let rt = tokio::runtime::Runtime::new()?;
-    // rt.block_on(async {
-    //       // get_xlsx(Sse).await?;
-    //       get_xlsx(Szse).await?;
-    //       Ok::<(), anyhow::Error>(())
-    //   })?;
-    rt.block_on(get_xlsx(Szse))?;
+    get_xlsx(Szse)?;
     read_excel("../assets/xlsx/szse.xlsx", Szse)?;
 
     Ok(())
@@ -26,13 +20,14 @@ fn main() -> Result<()> {
 
 /// Sse 股票列表数据暂时无法直接获取到，而且获取到的 xls 签名不是 ole ，无法解析。
 /// 所以只能手动下载，用 excel 保存为 xlsx 或 xls 。
-async fn get_xlsx(ex: Exchange) -> Result<()> {
+fn get_xlsx(ex: Exchange) -> Result<()> {
     let (url, fname) = match ex{
         Exchange::Szse=>("http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1110&TABKEY=tab1&random=0.8587844061443386","../assets/xlsx/szse.xlsx"),
         Exchange::Sse => ("http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1", "../assets/xlsx/sse.xls")
     };
-    let bytes = reqwest::get(url).await?.bytes().await?;
-    std::fs::write(fname, bytes)?;
+    let buf = &mut Vec::with_capacity(1 << 20);
+    ureq::get(url).call()?.into_reader().read_to_end(buf)?;
+    std::fs::write(fname, buf)?;
     Ok(())
 }
 
@@ -44,10 +39,10 @@ enum Exchange {
     Szse,
 }
 
-type Reader = std::io::BufReader<std::fs::File>;
-fn read_excel(path: &str, ex: Exchange) -> Result<Sheets<Reader>> {
+type FsReader = std::io::BufReader<std::fs::File>;
+fn read_excel(path: &str, ex: Exchange) -> Result<Sheets<FsReader>> {
     let now = Instant::now();
-    let mut workbook = open_workbook_auto(&path)?;
+    let mut workbook = open_workbook_auto(path)?;
     println!(
         "{:30}：{} s",
         path,
@@ -90,7 +85,7 @@ const fn match_ex(ex: Exchange) -> usize {
 }
 
 /// 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
-fn get_string<'a>(cell: &'a DataType) -> std::borrow::Cow<'a, str> {
+fn get_string(cell: &DataType) -> std::borrow::Cow<'_, str> {
     match cell {
         DataType::Int(x) => x.to_string().into(),
         DataType::Float(x) => (*x as i64).to_string().into(),

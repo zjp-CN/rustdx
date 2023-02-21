@@ -7,9 +7,6 @@ pub use day::*;
 mod east;
 pub use east::*;
 
-mod official;
-pub use official::*;
-
 const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION"));
 
 #[derive(FromArgs, PartialEq, Debug)]
@@ -31,7 +28,6 @@ pub struct TopLevel {
 #[argh(subcommand)]
 pub enum SubCommand {
     Day(DayCmd),
-    Official(Official),
     EastMoney(East),
 }
 
@@ -45,10 +41,9 @@ impl TopLevel {
             println!("{VERSION}");
             std::process::exit(0);
         }
-        match self.sub {
-            Day(ref cmd) => cmd.help_info().run(),
-            Official(ref cmd) => cmd.run(),
-            EastMoney(ref cmd) => cmd.run(),
+        match &self.sub {
+            Day(cmd) => cmd.help_info().run(),
+            EastMoney(cmd) => cmd.run(),
         }
     }
 }
