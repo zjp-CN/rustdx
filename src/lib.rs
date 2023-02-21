@@ -1,7 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/rustdx/0.4.0")]
 #![feature(doc_auto_cfg)]
-// #![feature(test)]
-// extern crate test;
 
 pub mod bytes_helper;
 
