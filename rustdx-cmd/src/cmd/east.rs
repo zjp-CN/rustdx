@@ -38,8 +38,7 @@ pub struct East {
 }
 
 impl East {
-    pub async fn get(&self) -> Result<String> {
-        let client = reqwest::Client::new();
+    pub fn get(&self) -> Result<String> {
         // 如果需要升序，使用 `order=code%2Case` 或者 `order=`
         // ashare => A 股，bshare => B 股，kshare => 科创板，equity => 前三种
         let url = format!(
@@ -50,16 +49,7 @@ impl East {
             fields=f18,f16,f12,f17,f15,f2,f6,f5&_=1631693257534",
             self.n
         );
-        let text = tokio::spawn(
-            client
-                .get(url)
-                // .headers(HEADER_SSE.to_owned())
-                .send()
-                .await?
-                .text(),
-        )
-        .await??;
-        Ok(text)
+        Ok(ureq::get(&url).call()?.into_string()?)
     }
 
     pub fn json(text: &str) -> Result<EastMarket> {
@@ -71,7 +61,7 @@ impl East {
     /// 注意：即使没有提供前一天的 factor 数据，
     /// 产生的 csv 文件依然会有 factor 一列，但数据是 0.
     pub fn run_no_previous(&self) -> Result<()> {
-        let text = crate::io::RUNTIME.block_on(self.get())?;
+        let text = self.get()?;
         let json = Self::json(&text)?;
         if self.show {
             println!("text:\n{text}\njson:\n{json:?}");
@@ -90,7 +80,7 @@ impl East {
     }
 
     pub fn run_previous(&self) -> Result<()> {
-        let text = crate::io::RUNTIME.block_on(self.get())?;
+        let text = self.get()?;
         let json = Self::json(&text)?;
         if self.show {
             println!("text:\n{text}\njson:\n{json:?}");

@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/rustdx/0.3.0")]
+#![doc(html_root_url = "https://docs.rs/rustdx/0.4.0")]
 #![feature(doc_auto_cfg)]
 // #![feature(test)]
 // extern crate test;

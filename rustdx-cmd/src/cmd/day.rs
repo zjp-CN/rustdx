@@ -1,5 +1,7 @@
 use anyhow::Result;
 use argh::FromArgs;
+use rustdx_cmd::fetch_code;
+use rustdx_cmd::fetch_code::StockList;
 
 /// 例子：`rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq`。
 #[derive(FromArgs, PartialEq, Debug)]
@@ -59,8 +61,6 @@ pub struct DayCmd {
     pub table: String,
 }
 
-pub type Stocklist = std::collections::HashSet<String>;
-
 impl DayCmd {
     pub fn run(&self) -> Result<()> {
         match self.output.as_str() {
@@ -107,16 +107,17 @@ impl DayCmd {
     }
 
     /// 匹配 `.day` 之前的内容：比如 `sz000001`
-    pub fn stocklist(&self) -> Option<Stocklist> {
-        use crate::io::{get_offical_stocks, read_xlsx};
+    pub fn stocklist(&self) -> Option<fetch_code::StockList> {
+        use crate::io::read_xlsx;
+        use fetch_code::get_offical_stocks;
         match (
             self.stocklist.as_deref(),
             self.exchange.as_deref(),
             self.xlsx_col,
         ) {
-            (Some("official"), _, _) => get_offical_stocks("official"),
-            (Some("sse"), _, _) => get_offical_stocks("sse"),
-            (Some("szse"), _, _) => get_offical_stocks("szse"),
+            (Some("official"), _, _) => get_offical_stocks("official").ok(),
+            (Some("sse"), _, _) => get_offical_stocks("sse").ok(),
+            (Some("szse"), _, _) => get_offical_stocks("szse").ok(),
             (Some(ex), Some(prefix), _) if ex.len() == 6 || ex.contains(',') => {
                 self.parse_list(prefix)
             }
@@ -149,7 +150,7 @@ impl DayCmd {
         )
     }
 
-    fn parse_list(&self, p: &str) -> Option<Stocklist> {
+    fn parse_list(&self, p: &str) -> Option<StockList> {
         let prefix = |x: &str| format!("{}{}", auto_prefix(p, x), x);
         self.stocklist
             .as_ref()

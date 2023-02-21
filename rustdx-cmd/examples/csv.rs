@@ -14,13 +14,13 @@ fn example() -> Result<(), Box<dyn Error>> {
         .filter_map(|f| f.ok())
         .map(|f: Factor| (f.code.clone(), f))
         .collect();
-    println!("{:?}", hm);
+    println!("{hm:?}");
     Ok(())
 }
 
 fn main() {
     if let Err(err) = example() {
-        println!("error running example: {}", err);
+        println!("error running example: {err}");
         process::exit(1);
     }
 }
