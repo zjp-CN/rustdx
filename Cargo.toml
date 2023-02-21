@@ -33,7 +33,6 @@ features = ["fast-gb-hanzi-encode"]
 [dev-dependencies]
 # backtrace 是在 cargo test 无法并行的情况下 用于产生 test name （从而产生 snapshot name ）
 insta = "1"
-version-sync = {version = "0.9", default-features = false, features = ["html_root_url_updated"]}
 csv = "1"
 
 [profile.bench]

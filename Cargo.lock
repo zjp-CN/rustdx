@@ -480,7 +480,6 @@ dependencies = [
  "miniz_oxide 0.7.1",
  "serde",
  "thiserror",
- "version-sync",
 ]
 
 [[package]]
@@ -535,12 +534,6 @@ dependencies = [
  "ring",
  "untrusted",
 ]
-
-[[package]]
-name = "semver"
-version = "1.0.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58bc9567378fc7690d6b2addae4e60ac2eeea07becb2c64b9f218b53865cba2a"
 
 [[package]]
 name = "serde"
@@ -716,18 +709,6 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
-]
-
-[[package]]
-name = "version-sync"
-version = "0.9.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99d0801cec07737d88cb900e6419f6f68733867f90b3faaa837e84692e101bf0"
-dependencies = [
- "proc-macro2",
- "semver",
- "syn",
- "url",
 ]
 
 [[package]]
