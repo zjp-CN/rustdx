@@ -58,7 +58,7 @@ pub struct Day<'a> {
     pub factor: f64,
 }
 
-/// 排除掉 "-" 无实际数据的股票
+/// 排除掉 "-" 无实际数据的股票（完全可以不必考虑这些无效数据）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum F32<'a> {

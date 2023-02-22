@@ -7,7 +7,7 @@ description = "受 pytdx 启发的 A 股数据获取库"
 repository  = "https://github.com/zjp-CN/rustdx"
 authors     = ["zjp <jiping_zhou@foxmail.com>"]
 exclude     = [
-                "assets", "examples", "benches", "tests", "old",
+                "assets", "examples", "benches", "tests", "old", "tests-integration",
                 "CHANGELOG.md", "*.csv", "*.log", ".github", ".gitignore",
                 "rustfmt.toml", "LICENSE"
               ]
@@ -28,6 +28,9 @@ features = ["fast-gb-hanzi-encode"]
 insta = "1"
 csv = "1"
 
+[profile.test]
+opt-level = 3
+
 [profile.bench]
 lto = true
 opt-level = 3
@@ -37,7 +40,7 @@ lto = true
 opt-level = 3
 
 [workspace]
-members = ["rustdx-cmd"]
+members = ["rustdx-cmd", "tests-integration"]
 
 [workspace.dependencies]
 log = "0.4"
