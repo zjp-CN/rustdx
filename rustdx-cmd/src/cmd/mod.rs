@@ -1,5 +1,5 @@
-use anyhow::Result;
 use argh::FromArgs;
+use eyre::Result;
 
 mod day;
 pub use day::*;

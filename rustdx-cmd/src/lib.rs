@@ -1,2 +1,4 @@
+/// 东财数据
+pub mod eastmoney;
 /// 从交易所获取股票代码
 pub mod fetch_code;

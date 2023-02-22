@@ -1,4 +1,4 @@
-use anyhow::Result;
+use eyre::{anyhow, Result};
 use std::collections::HashSet;
 
 // 股票上限
@@ -67,7 +67,7 @@ pub fn get_sz_stocks(set: &mut StockList) -> Result<usize> {
         }));
         Ok(range.height() - 1)
     } else {
-        Err(anyhow::anyhow!("xlsx parse error"))
+        Err(anyhow!("xlsx parse error"))
     }
 }
 
@@ -126,7 +126,6 @@ fn request_sh(stocktype: &str, pagesize: &str) -> ureq::Request {
 // 上交所 科创板 68 开头（目前 350 只，只需一次请求） => stockType=8, pagesize=400
 //        A 股 60 开头（目前 1650 只，只需一次请求） => stockType=1, pagesize=1700
 pub fn get_sh_stocks(set: &mut StockList, stocktype: &str, pagesize: &str) -> Result<usize> {
-    use anyhow::anyhow;
     let text = request_sh(stocktype, pagesize).call()?.into_string()?;
     let pos1 = text
         .find("total\":")

@@ -14,24 +14,21 @@ exclude     = [
               ]
 
 [dependencies]
-anyhow   = "1"
-argh     = "0.1"
+eyre = "0.6"
+argh = "0.1"
+csv  = "1.1"
 calamine = "0.19"
-csv      = "1.1"
-log      = "0.4"
-chrono   = "0.4"
-serde_json  = "1"
-lazy_static = "1"
-subprocess  = "0.2"
-miniz_oxide = "0.7"
+subprocess = "0.2"
+serde_json = "1"
+
+log = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
 
 [dependencies.rustdx]
 version  = "0.4.0"
 path = "../"
-
-[dependencies.serde]
-version  = "1"
-features = ["derive"]
 
 [dependencies.ureq]
 version = "2"

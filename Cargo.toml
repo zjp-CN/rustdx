@@ -13,15 +13,12 @@ exclude     = [
               ]
 
 [dependencies]
-chrono  = "0.4"
-lazy_static = "1"
 miniz_oxide = "0.7"
-thiserror = "1"
-log = "0.4"
-
-[dependencies.serde]
-version  = "1"
-features = ["derive"]
+log = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+lazy_static = { workspace = true }
 
 [dependencies.encoding_rs]
 version  = "0.8"
@@ -41,6 +38,13 @@ opt-level = 3
 
 [workspace]
 members = ["rustdx-cmd"]
+
+[workspace.dependencies]
+log = "0.4"
+chrono  = "0.4"
+thiserror = "1"
+lazy_static = "1"
+serde = { version = "1", features = ["derive"] }
 
 [package.metadata.docs.rs]
 all-features = true

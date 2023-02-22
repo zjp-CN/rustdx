@@ -1,4 +1,4 @@
-use anyhow::Result;
+use eyre::Result;
 use rustdx_cmd::fetch_code::*;
 
 macro_rules! get {

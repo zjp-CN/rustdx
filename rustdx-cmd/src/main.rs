@@ -1,7 +1,7 @@
 mod cmd;
 mod io;
 
-use anyhow::Result;
+use eyre::Result;
 
 fn main() -> Result<()> {
     // log_init()?;

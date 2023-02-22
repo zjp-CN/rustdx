@@ -1,5 +1,5 @@
 use crate::cmd::DayCmd;
-use anyhow::{anyhow, Result};
+use eyre::{anyhow, Result};
 use rustdx::file::{
     day::fq::Day,
     gbbq::{Factor, Gbbq},

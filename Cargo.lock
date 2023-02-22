@@ -18,12 +18,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anyhow"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "224afbd727c3d6e4b90103ece64b8d1b67fbb1973b1046c2281eed3f3803f800"
-
-[[package]]
 name = "argh"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -253,6 +247,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "eyre"
+version = "0.6.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c2b6b5a29c02cdc822728b7d7b8ae1bab3e3b05d44522770ddd49722eeac7eb"
+dependencies = [
+ "indenter",
+ "once_cell",
+]
+
+[[package]]
 name = "flate2"
 version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -304,6 +308,12 @@ dependencies = [
  "unicode-bidi",
  "unicode-normalization",
 ]
+
+[[package]]
+name = "indenter"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce23b50ad8242c51a442f3ff322d56b02f08852c77e4c0b4d3fd684abc89c683"
 
 [[package]]
 name = "insta"
@@ -486,18 +496,17 @@ dependencies = [
 name = "rustdx-cmd"
 version = "0.4.0"
 dependencies = [
- "anyhow",
  "argh",
  "calamine",
  "chrono",
  "csv",
- "lazy_static",
+ "eyre",
  "log",
- "miniz_oxide 0.7.1",
  "rustdx",
  "serde",
  "serde_json",
  "subprocess",
+ "thiserror",
  "ureq",
 ]
 

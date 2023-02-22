@@ -1,5 +1,5 @@
-use anyhow::Result;
 use calamine::{open_workbook_auto, DataType, Reader, Sheets};
+use eyre::Result;
 use std::time::Instant;
 
 /// 貌似对于中大文件，xlsx 解析更快，对于很小的文件，xls 更快。一般使用 xlsx 即可。

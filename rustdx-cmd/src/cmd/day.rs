@@ -1,5 +1,5 @@
-use anyhow::Result;
 use argh::FromArgs;
+use eyre::Result;
 use rustdx_cmd::fetch_code;
 use rustdx_cmd::fetch_code::StockList;
 
