@@ -2,25 +2,24 @@
 #[test]
 #[ignore = "联网更新数据"]
 fn daily() {
-    use super::{now, to_table, Tabled};
-    use insta::assert_display_snapshot as snap;
+    use super::{now, shot, to_table, Tabled};
     use rustdx_cmd::eastmoney::{get, parse, Day, F32};
     use std::fmt::Display;
     use std::time::Instant;
 
     // 此测试运行的日期
-    snap!(now(), @"2023-02-22 23:18:32.634160957 +08:00");
+    shot!(now(), @"2023-02-22 23:18:32.634160957 +08:00");
 
     let now = Instant::now();
     let text = get(6000).unwrap();
     let elapse_get = now.elapsed().as_millis();
-    snap!(elapse_get, @"993"); // 获取数据的耗时
+    shot!(elapse_get, @"993"); // 获取数据的耗时
 
-    snap!("东财-股票-文本", &text);
+    shot!("东财-股票-文本", &text);
 
     let data = parse(&text).unwrap();
     let iter = data.data.diff.into_iter().filter_map(Data::try_from);
-    snap!("东财-股票-json", to_table(iter));
+    shot!("东财-股票-json", to_table(iter));
 
     pub struct Float(f32);
     impl Display for Float {

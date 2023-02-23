@@ -2,6 +2,7 @@
 
 mod east;
 
+pub use insta::{assert_debug_snapshot as snap, assert_display_snapshot as shot};
 use tabled::{Table, Tabled};
 
 pub type DateTime = chrono::DateTime<chrono::Local>;
