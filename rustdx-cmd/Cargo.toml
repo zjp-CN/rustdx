@@ -20,6 +20,7 @@ csv  = "1.1"
 calamine = "0.19"
 subprocess = "0.2"
 serde_json = "1"
+env_logger = "0.10"
 
 log = { workspace = true }
 serde = { workspace = true }

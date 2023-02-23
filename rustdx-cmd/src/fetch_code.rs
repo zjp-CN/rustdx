@@ -8,14 +8,13 @@ const SH1: &str = "1800";
 pub type StockList = HashSet<String>;
 
 /// sh8, sh1, sz: 407, 1665, 2618 => 4690
-/// 此数据可运行 `test_get_offical_stocks` 得知
 pub fn offical_stocks(set: &mut StockList) -> Result<usize> {
     let len = (
         get_sh_stocks(set, "8", SH8)?,
         get_sh_stocks(set, "1", SH1)?,
         get_sz_stocks(set)?,
     );
-    dbg!(len);
+    info!("股票数量 (sh_8, sh_1, sz) = {len:?}");
     let len = len.0 + len.1 + len.2;
     debug_assert_eq!(set.len(), len);
     Ok(len)
@@ -30,17 +29,8 @@ pub fn get_offical_stocks(cond: &str) -> Result<StockList> {
         _ => unreachable!("请输入 official | szse | sse 中的一个"),
     };
 
-    dbg!(len);
+    info!("获得上证和深证股票数量：{len}");
     Ok(set)
-}
-
-#[test]
-fn test_get_offical_stocks() -> Result<()> {
-    let mut set = StockList::with_capacity(6000);
-    let len = offical_stocks(&mut set)?;
-    assert_eq!(set.len(), len);
-    dbg!(len);
-    Ok(())
 }
 
 /// 深交所官网的 A 股和创业板股票信息。

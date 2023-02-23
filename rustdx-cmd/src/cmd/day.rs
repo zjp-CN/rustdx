@@ -91,7 +91,6 @@ impl DayCmd {
     }
 
     pub fn help_info(&self) -> &Self {
-        // self.path.iter().map(|p| p.read_dir()).for_each(|p| println!("{:?}", p));
         for arg in &self.description {
             match arg.as_str() {
                 "output" | "o" => println!("{DAYCMD_OUTPUT}"),

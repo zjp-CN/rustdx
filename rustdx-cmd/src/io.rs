@@ -23,7 +23,7 @@ pub fn run_csv(cmd: &DayCmd) -> Result<()> {
         .from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
-        println!("dir: {dir:?} day 文件数量：{n}");
+        info!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
@@ -33,7 +33,7 @@ pub fn run_csv(cmd: &DayCmd) -> Result<()> {
             .take(take)
             .filter_map(|((_, code), src)| {
                 count += 1;
-                println!("#{code:06}# {src:?}");
+                debug!("#{code:06}# {src:?}");
                 rustdx::file::day::Day::from_file_into_vec(code, src).ok()
             })
             .flatten()
@@ -59,7 +59,7 @@ pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
         .from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
-        println!("dir: {dir:?} day 文件数量：{n}");
+        info!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
@@ -69,7 +69,7 @@ pub fn run_csv_fq(cmd: &DayCmd) -> Result<()> {
             .take(take)
             .filter_map(|((_, code), src)| {
                 count += 1;
-                println!("#{code:06}# {src:?}");
+                debug!("#{code:06}# {src:?}");
                 Day::new(code, src, gbbq.get(&code).map(Vec::as_slice)).ok()
             })
             .flatten()
@@ -98,7 +98,7 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
         .from_writer(file);
     for dir in &cmd.path {
         let n = filter_file(dir)?.count();
-        println!("dir: {dir:?} day 文件数量：{n}");
+        info!("dir: {dir:?} day 文件数量：{n}");
         let take = cmd.amount.unwrap_or(n);
 
         let mut count: usize = 0;
@@ -108,7 +108,7 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
             .take(take)
             .filter_map(|((_, code), src)| {
                 count += 1;
-                println!("#{code:06}# {src:?}");
+                debug!("#{code:06}# {src:?}");
                 Day::concat(
                     code,
                     src,
@@ -143,11 +143,11 @@ fn filter(b: bool, src: &Path, hm: Option<&StockList>, dir: &Path) -> Option<boo
 
 fn print(dir: &Path, count: usize, take: usize) {
     if count == 0 && take != 0 {
-        println!("{dir:?} 目录下无 `.day` 文件符合要求");
+        error!("{dir:?} 目录下无 `.day` 文件符合要求");
     } else if take == 0 {
-        println!("请输入大于 0 的文件数量");
+        error!("请输入大于 0 的文件数量");
     } else {
-        println!("{dir:?}\t已完成：{count}");
+        info!("{dir:?}\t已完成：{count}");
     }
 }
 
@@ -212,7 +212,7 @@ pub fn insert_clickhouse(output: &impl AsRef<Path>, table: &str, keep: bool) -> 
         .args(&["--query", &query])
         .stdin(Redirection::File(File::open(output)?))
         .capture()?;
-    println!(
+    error!(
         "stdout:\n{}stderr:\n{}",
         capture.stdout_str(),
         capture.stderr_str()
