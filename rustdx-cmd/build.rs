@@ -1,7 +1,7 @@
-use std::{env::var, fs::File, io::Write, path::Path, process::Command};
+use std::{env, process::Command};
 
 fn get_git_version() -> String {
-    let version = var("CARGO_PKG_VERSION").expect("no `CARGO_PKG_VERSION`");
+    let version = env::var("CARGO_PKG_VERSION").expect("no `CARGO_PKG_VERSION`");
 
     let child = Command::new("git").args(["describe", "--always"]).output();
     match child {
@@ -18,8 +18,5 @@ fn get_git_version() -> String {
 
 fn main() {
     let version = get_git_version();
-    let p = Path::new(&var("OUT_DIR").expect("no `OUT_DIR`")).join("VERSION");
-    let mut f = File::create(p).unwrap_or_else(|_| panic!("{}", "{p:?} not created"));
-    f.write_all(version.trim().as_bytes())
-        .unwrap_or_else(|_| panic!("{}", "{p:?} not written"));
+    println!("cargo:rustc-env=RUSTDX_VERSION={version}");
 }

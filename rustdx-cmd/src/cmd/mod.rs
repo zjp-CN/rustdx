@@ -7,14 +7,27 @@ pub use day::*;
 mod east;
 pub use east::*;
 
-const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION"));
+const VERSION: &str = env!("RUSTDX_VERSION");
 
 #[derive(FromArgs, PartialEq, Debug)]
 /// rustdx
 pub struct TopLevel {
     #[argh(subcommand)]
     sub: SubCommand,
+}
 
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand)]
+enum SubCommand {
+    Day(DayCmd),
+    EastMoney(East),
+    Help(Show),
+}
+
+/// rustdx 版本号、调试
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "show")]
+struct Show {
     /// 版本号。
     #[argh(switch, short = 'v')]
     version: bool,
@@ -24,26 +37,21 @@ pub struct TopLevel {
     pub print_struct: bool,
 }
 
-#[derive(FromArgs, PartialEq, Debug)]
-#[argh(subcommand)]
-pub enum SubCommand {
-    Day(DayCmd),
-    EastMoney(East),
-}
-
 impl TopLevel {
     pub fn match_subcmd(&self) -> Result<()> {
         use SubCommand::*;
-        if self.print_struct {
-            println!("{self:#?}");
-        }
-        if self.version {
-            println!("{VERSION}");
-            std::process::exit(0);
-        }
         match &self.sub {
             Day(cmd) => cmd.help_info().run(),
             EastMoney(cmd) => cmd.run(),
+            Help(help) => {
+                if help.version {
+                    println!("当前版本号：{VERSION}");
+                }
+                if help.print_struct {
+                    println!("{self:#?}");
+                }
+                Ok(())
+            }
         }
     }
 }
