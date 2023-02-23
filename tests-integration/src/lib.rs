@@ -1,6 +1,18 @@
 //! 此库用于测试 rustdx 和 rustdx-cmd
 
+/// 测量一个表达式花费的时间，返回 `(val, time_in_millis)`
+#[allow(unused)]
+macro_rules! elapse {
+    ($e:expr) => {{
+        let now = std::time::Instant::now();
+        let val = $e;
+        let time = now.elapsed().as_millis();
+        (val, time)
+    }};
+}
+
 mod east;
+mod fetch_code;
 
 pub use insta::{assert_debug_snapshot as snap, assert_display_snapshot as shot};
 use tabled::{Table, Tabled};

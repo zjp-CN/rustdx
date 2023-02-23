@@ -5,15 +5,12 @@ fn daily() {
     use super::{now, shot, to_table, Tabled};
     use rustdx_cmd::eastmoney::{get, parse, Day, F32};
     use std::fmt::Display;
-    use std::time::Instant;
 
     // 此测试运行的日期
-    shot!(now(), @"2023-02-22 23:18:32.634160957 +08:00");
+    shot!(now(), @"2023-02-23 15:38:52.329844174 +08:00");
 
-    let now = Instant::now();
-    let text = get(6000).unwrap();
-    let elapse_get = now.elapsed().as_millis();
-    shot!(elapse_get, @"993"); // 获取数据的耗时
+    let (text, elapse_get) = elapse!(get(6000).unwrap());
+    shot!(elapse_get, @"358"); // 获取数据的耗时
 
     shot!("东财-股票-文本", &text);
 

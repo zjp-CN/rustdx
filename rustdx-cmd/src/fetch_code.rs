@@ -7,23 +7,40 @@ const SH1: &str = "1800";
 
 pub type StockList = HashSet<String>;
 
-/// sh8, sh1, sz: 407, 1665, 2618 => 4690
-pub fn offical_stocks(set: &mut StockList) -> Result<usize> {
-    let len = (
-        get_sh_stocks(set, "8", SH8)?,
-        get_sh_stocks(set, "1", SH1)?,
-        get_sz_stocks(set)?,
-    );
-    info!("股票数量 (sh_8, sh_1, sz) = {len:?}");
-    let len = len.0 + len.1 + len.2;
-    debug_assert_eq!(set.len(), len);
-    Ok(len)
+#[derive(Debug)]
+pub struct SHSZ {
+    sh1: usize,
+    sh8: usize,
+    sz: usize,
+}
+
+impl SHSZ {
+    /// 计算总和
+    pub fn count(&self) -> usize {
+        let SHSZ { sh1, sh8, sz } = &self;
+        sh1 + sh8 + sz
+    }
+}
+
+/// 获取上证和深证的股票代码
+///
+/// 数量如下：SHSZ { sh1: 1646, sh8: 407, sz: 2745, } -> 4798
+///
+/// 见 `tests-integration::fetch_code::offical_stocks` 测试
+pub fn offical_stocks(set: &mut StockList) -> Result<SHSZ> {
+    let count = SHSZ {
+        sh1: get_sh_stocks(set, "1", SH1)?,
+        sh8: get_sh_stocks(set, "8", SH8)?,
+        sz: get_sz_stocks(set)?,
+    };
+    info!("股票数量 {count:?}");
+    Ok(count)
 }
 
 pub fn get_offical_stocks(cond: &str) -> Result<StockList> {
     let mut set = StockList::with_capacity(6000);
     let len = match cond {
-        "official" => offical_stocks(&mut set)?,
+        "official" => offical_stocks(&mut set)?.count(),
         "szse" => get_sz_stocks(&mut set)?,
         "sse" => get_sh_stocks(&mut set, "8", SH8)? + get_sh_stocks(&mut set, "1", SH1)?,
         _ => unreachable!("请输入 official | szse | sse 中的一个"),
