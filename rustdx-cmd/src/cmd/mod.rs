@@ -2,10 +2,12 @@ use argh::FromArgs;
 use eyre::Result;
 
 mod day;
-pub use day::*;
-
 mod east;
-pub use east::*;
+
+pub use self::{
+    day::{auto_prefix, DayCmd},
+    east::EastCmd,
+};
 
 const VERSION: &str = env!("RUSTDX_VERSION");
 
@@ -20,7 +22,7 @@ pub struct TopLevel {
 #[argh(subcommand)]
 enum SubCommand {
     Day(DayCmd),
-    EastMoney(East),
+    EastMoney(EastCmd),
     Help(Show),
 }
 

@@ -5,7 +5,7 @@ use rustdx_cmd::eastmoney::*;
 /// 东方财富当日 A 股数据。多数情况下使用 `rustdx east -p factor.csv` 即可。
 #[derive(FromArgs, PartialEq, Debug)]
 #[argh(subcommand, name = "east")]
-pub struct East {
+pub struct EastCmd {
     /// 保存数据的 CSV 路径文件名。默认为当前路径下 eastmoney.csv 文件。
     #[argh(option, short = 'o', default = r#""eastmoney.csv".into()"#)]
     pub output: String,
@@ -37,7 +37,7 @@ pub struct East {
     pub table: String,
 }
 
-impl East {
+impl EastCmd {
     /// 注意：即使没有提供前一天的 factor 数据，
     /// 产生的 csv 文件依然会有 factor 一列，但数据是 0.
     pub fn run_no_previous(&self) -> Result<()> {
