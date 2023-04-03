@@ -1,0 +1,5 @@
+---
+source: rustdx-cmd/examples/excel_and_online.rs
+expression: "&exchange - &east"
+---
+{}
