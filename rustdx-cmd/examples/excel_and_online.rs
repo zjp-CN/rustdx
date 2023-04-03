@@ -1,18 +1,28 @@
-use eyre::Result;
+#![feature(once_cell)]
+use insta::assert_debug_snapshot;
 use rustdx_cmd::fetch_code::*;
+use std::sync::LazyLock;
 
 macro_rules! get {
     (sz) => {{
         let mut set = ::std::collections::HashSet::with_capacity(3000);
-        get_sz_stocks(&mut set)?;
-        set.into_iter().collect::<Vec<_>>()
+        get_sz_stocks(&mut set).unwrap();
+        let mut v = set.into_iter().collect::<Vec<_>>();
+        v.sort();
+        v
     }};
     (sh, $a:literal, $b:literal) => {{
         let mut set = ::std::collections::HashSet::with_capacity(3000);
-        get_sh_stocks(&mut set, $a, $b)?;
-        set.into_iter().collect::<Vec<_>>()
+        get_sh_stocks(&mut set, $a, $b).unwrap();
+        let mut v = set.into_iter().collect::<Vec<_>>();
+        v.sort();
+        v
     }};
 }
+
+static SH8: LazyLock<Vec<String>> = LazyLock::new(|| get!(sh, "8", "400"));
+static SH1: LazyLock<Vec<String>> = LazyLock::new(|| get!(sh, "1", "1700"));
+static SZ: LazyLock<Vec<String>> = LazyLock::new(|| get!(sz));
 
 /// sh8: 334
 /// ["sh688001", "sh688002", "sh688003", "sh688004", "sh688005", "sh688006", "sh688007",
@@ -29,8 +39,8 @@ macro_rules! get {
 ///  "sz000009", "sz000010", "sz000011"]
 /// ["sz301045", "sz301046", "sz301047", "sz301048", "sz301049", "sz301050", "sz301051",
 ///  "sz301052", "sz301053", "sz301055"]
-fn main() -> Result<()> {
-    let (sh8, sh1, sz) = (get!(sh, "8", "400"), get!(sh, "1", "1700"), get!(sz));
+fn main() {
+    let (sh8, sh1, sz) = (&*SH8, &*SH1, &*SZ);
     println!(
         "sh8: {}\n{:?}\n{:?}",
         sh8.len(),
@@ -49,6 +59,12 @@ fn main() -> Result<()> {
         &sz[..10],
         &sz[sz.len() - 10..]
     );
+}
 
-    Ok(())
+#[test]
+fn save() {
+    let (sh8, sh1, sz) = (&*SH8, &*SH1, &*SZ);
+    assert_debug_snapshot!("sh1", sh1);
+    assert_debug_snapshot!("sh8", sh8);
+    assert_debug_snapshot!("sz", sz);
 }
