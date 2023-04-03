@@ -1,19 +1,18 @@
 #![feature(once_cell)]
-use insta::assert_debug_snapshot;
-use rustdx_cmd::fetch_code::*;
+use rustdx_cmd::fetch_code;
 use std::sync::LazyLock;
 
 macro_rules! get {
     (sz) => {{
         let mut set = ::std::collections::HashSet::with_capacity(3000);
-        get_sz_stocks(&mut set).unwrap();
+        fetch_code::get_sz_stocks(&mut set).unwrap();
         let mut v = set.into_iter().collect::<Vec<_>>();
         v.sort();
         v
     }};
     (sh, $a:literal, $b:literal) => {{
         let mut set = ::std::collections::HashSet::with_capacity(3000);
-        get_sh_stocks(&mut set, $a, $b).unwrap();
+        fetch_code::get_sh_stocks(&mut set, $a, $b).unwrap();
         let mut v = set.into_iter().collect::<Vec<_>>();
         v.sort();
         v
@@ -62,12 +61,48 @@ fn main() {
 }
 
 #[test]
-fn save() {
+fn save() -> eyre::Result<()> {
+    use insta::assert_debug_snapshot as snap;
+    use rustdx_cmd::eastmoney;
+    use std::collections::HashSet;
+
     let (sh8, sh1, sz) = (&*SH8, &*SH1, &*SZ);
-    assert_debug_snapshot!("sh1", sh1);
-    assert_debug_snapshot!(sh1.len(), @"1644");
-    assert_debug_snapshot!("sh8", sh8);
-    assert_debug_snapshot!(sh8.len(), @"407");
-    assert_debug_snapshot!("sz", sz);
-    assert_debug_snapshot!(sz.len(), @"2758");
+    let (lsh8, lsh1, lsz) = (sh8.len(), sh1.len(), sz.len());
+    snap!("sh1", sh1);
+    snap!(lsh1, @"1679");
+    snap!("sh8", sh8);
+    snap!(lsh8, @"510");
+    snap!("sz", sz);
+    snap!(lsz, @"2758");
+    let l = lsh1 + lsh8 + lsz;
+    snap!(l, @"4947");
+
+    let s = eastmoney::get(6000)?;
+    let res = eastmoney::parse(&s)?;
+    let east: HashSet<_> = res
+        .data
+        .diff
+        .into_iter()
+        .filter(|v| matches!(v.open, eastmoney::F32::Yes(_)))
+        .map(|v| v.code)
+        .collect();
+    let mut v = east.iter().collect::<Vec<_>>();
+    v.sort();
+    let lv = v.len();
+    let total = res.data.total as usize;
+    eyre::ensure!(lv == total, "lv = {lv} 与 total = {total} 不相等");
+    snap!("eastmoney", v);
+    snap!(lv, @"5168");
+    snap!(lv == l, @"false");
+
+    let exchange = HashSet::from_iter(
+        [sh8.iter().cloned(), sh1.iter().cloned(), sz.iter().cloned()]
+            .into_iter()
+            .flatten()
+            .map(|s| s[2..].to_string()),
+    );
+    snap!("diff_exchange-east", &exchange - &east);
+    snap!("diff_east-exchange", &east - &exchange);
+
+    Ok(())
 }

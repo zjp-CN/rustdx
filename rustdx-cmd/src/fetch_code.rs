@@ -2,8 +2,8 @@ use eyre::{anyhow, Result};
 use std::collections::HashSet;
 
 // 股票上限
-const SH8: &str = "500";
-const SH1: &str = "1800";
+const SH8: &str = "800";
+const SH1: &str = "2000";
 
 pub type StockList = HashSet<String>;
 
@@ -84,31 +84,24 @@ const ACCEPT_LANGUAGE: &str =
 
 pub fn ureq_sz_with_headers(url: &str) -> ureq::Request {
     ureq::get(url)
-        .set("ACCEPT", "application/json, text/javascript, */*; q=0.01")
+        .set("ACCEPT", "*/*")
         .set("ACCEPT_LANGUAGE", ACCEPT_LANGUAGE)
         .set("CACHE_CONTROL", "no-cache")
         .set("CONNECTION", "keep-alive")
         .set("CONTENT_TYPE", "application/json")
         .set("DNT", "1")
         .set("PRAGMA", "no-cache")
-        .set("REFERER", "http://www.szse.cn/market/trend/index.html")
+        .set("REFERER", "http://www.sse.com.cn/")
         .set("USER_AGENT", USER_AGENT)
 }
 pub fn ureq_sh_with_headers(url: &str) -> ureq::Request {
-    let cookie = "yfx_c_g_u_id_10000042=_ck21022514270615975949368753826;yfx_mr_10000042=\
-            %3A%3Amarket_type_free_search%3A%3A%3A%3Abaidu%3A%3A%3A%3A%3A%3A%3A%3A\
-            www.baidu.com%3A%3A%3A%3Apmf_from_free_search; yfx_key_10000042=;\
-            VISITED_FUND_CODE=%5B%22501000%22%5D; yfx_mr_f_10000042\
-            =%3A%3Amarket_type_free_search%3A%3A%3A%3Abaidu%3A%3A%3A%3A%3A%3A%3A%3A\
-            www.baidu.com%3A%3A%3A%3Apmf_from_free_search;\
-            VISITED_COMPANY_CODE=%5B%22501000%22%2C%22600000%22%2C%22600017%22%5D;\
-            seecookie=%5B600000%5D%3A%u6D66%u53D1%u94F6%u884C%2C%5B600017%5D%3A%u65E5%u7167%u6E2F;\
-            VISITED_STOCK_CODE=%5B%22600017%22%5D; VISITED_MENU\
-            =%5B%228314%22%2C%228316%22%2C%228317%22%2C%228453\
-            %22%2C%229062%22%2C%228529%22%2C%228530%22%2C%229055\
-            %22%2C%228535%22%2C%228525%22%2C%228528%22%5D;\
-            yfx_f_l_v_t_10000042=f_t_1614234426586__r_t_1630917175096__v_t_1630931359300__r_c_4";
-
+    let cookie = "ba17301551dcbaf9_gdp_user_key=; \
+                  ba17301551dcbaf9_gdp_session_id=0876b773-38a3-44d0-bb4a-2b5569025b82; \
+                  gdp_user_id=gioenc-2g8894g6%2C764a%2C50d8%2C8d6g%2C3bg6194752ce; \
+                  ba17301551dcbaf9_gdp_session_id_0876b773-38a3-44d0-bb4a-2b5569025b82=true; \
+                  JSESSIONID=0311A5533F5FD798EE9DAFDE6A1D70A7; \
+                  ba17301551dcbaf9_gdp_sequence_ids=\
+                  {%22globalKey%22:14%2C%22VISIT%22:2%2C%22PAGE%22:5%2C%22VIEW_CHANGE%22:2%2C%22CUSTOM%22:3%2C%22VIEW_CLICK%22:6}";
     ureq::get(url)
         .set("ACCEPT", "*/*")
         .set("ACCEPT_LANGUAGE", ACCEPT_LANGUAGE)
@@ -123,10 +116,14 @@ pub fn ureq_sh_with_headers(url: &str) -> ureq::Request {
 // 上交所 科创板 68 开头（目前 350 只，只需一次请求） => stockType=8, pagesize=400
 //        A 股 60 开头（目前 1650 只，只需一次请求） => stockType=1, pagesize=1700
 fn request_sh(stocktype: &str, pagesize: &str) -> ureq::Request {
-    let url = format!("http://query.sse.com.cn/security/stock/getStockListData\
-          .do?&jsonCallBack=jsonpCallback72491&isPagination=true&stockCode=&csrcCode=&areaName=\
-          &stockType={stocktype}&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={pagesize}\
-          &pageHelp.pageNo=2&pageHelp.endPage=21&_=1630931360678");
+    let url = format!(
+        "http://query.sse.com.cn/sseQuery/commonQuery.do?\
+        jsonCallBack=jsonpCallback37525685&STOCK_TYPE={stocktype}\
+        &REG_PROVINCE=&CSRC_CODE=&STOCK_CODE=&sqlId=COMMON_SSE_CP_GPJCTPZ_GPLB_GP_L\
+        &COMPANY_STATUS=2%2C4%2C5%2C7%2C8&type=inParams&isPagination=true\
+        &pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize={pagesize}\
+        &pageHelp.pageNo=1&pageHelp.endPage=1&_=1680491539414"
+    );
     ureq_sh_with_headers(&url)
 }
 
