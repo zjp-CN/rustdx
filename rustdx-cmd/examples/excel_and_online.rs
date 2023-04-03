@@ -20,8 +20,8 @@ macro_rules! get {
     }};
 }
 
-static SH8: LazyLock<Vec<String>> = LazyLock::new(|| get!(sh, "8", "400"));
-static SH1: LazyLock<Vec<String>> = LazyLock::new(|| get!(sh, "1", "1700"));
+static SH8: LazyLock<Vec<String>> = LazyLock::new(|| get!(sh, "8", "1000"));
+static SH1: LazyLock<Vec<String>> = LazyLock::new(|| get!(sh, "1", "2500"));
 static SZ: LazyLock<Vec<String>> = LazyLock::new(|| get!(sz));
 
 /// sh8: 334
@@ -65,6 +65,9 @@ fn main() {
 fn save() {
     let (sh8, sh1, sz) = (&*SH8, &*SH1, &*SZ);
     assert_debug_snapshot!("sh1", sh1);
+    assert_debug_snapshot!(sh1.len(), @"1644");
     assert_debug_snapshot!("sh8", sh8);
+    assert_debug_snapshot!(sh8.len(), @"407");
     assert_debug_snapshot!("sz", sz);
+    assert_debug_snapshot!(sz.len(), @"2758");
 }
