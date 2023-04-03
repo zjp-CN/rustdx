@@ -83,17 +83,19 @@ fn save() -> eyre::Result<()> {
         .data
         .diff
         .into_iter()
-        .filter(|v| matches!(v.open, eastmoney::F32::Yes(_)))
+        .filter(|v| matches!(v.open, eastmoney::F32::Yes(_))) // 这排除了不需要的股票
         .map(|v| v.code)
         .collect();
     let mut v = east.iter().collect::<Vec<_>>();
     v.sort();
     let lv = v.len();
     let total = res.data.total as usize;
-    eyre::ensure!(lv == total, "lv = {lv} 与 total = {total} 不相等");
     snap!("eastmoney", v);
-    snap!(lv, @"5168");
-    snap!(lv == l, @"false");
+    snap!(lv <= total, @"true"); // 东财总是含有退市和待上市的股票代码
+    snap!(total, @"5168");
+    snap!(lv, @"4943");
+    snap!(lv == l, @"false"); // 这应该相等，不过，停盘、ST 会导致差异，比如 600012/002022
+                              // 2023-04-03 这天，它们属于正常的股票，所以出现在交易所，而从东财中排除
 
     let exchange = HashSet::from_iter(
         [sh8.iter().cloned(), sh1.iter().cloned(), sz.iter().cloned()]

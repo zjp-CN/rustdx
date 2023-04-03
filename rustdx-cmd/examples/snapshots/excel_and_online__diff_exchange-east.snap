@@ -2,4 +2,9 @@
 source: rustdx-cmd/examples/excel_and_online.rs
 expression: "&exchange - &east"
 ---
-{}
+{
+    "600012",
+    "002022",
+    "300330",
+    "300309",
+}
