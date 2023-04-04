@@ -51,7 +51,7 @@ impl EastCmd {
             let file = std::fs::File::create(&self.output)?;
             let mut wrt = csv::Writer::from_writer(file);
             for row in &json.data.diff {
-                if let F32::Yes(_) = row.close {
+                if row.close.is_some() {
                     wrt.serialize(row)?;
                 }
             }
@@ -75,7 +75,7 @@ impl EastCmd {
         let mut wrt = csv::Writer::from_writer(file);
         for row in &mut json.data.diff {
             // 排除掉无数据的股票：停牌、未上市之类
-            if let (&F32::Yes(c), &F32::Yes(p)) = (&row.close, &row.preclose) {
+            if let (&Some(c), &Some(p)) = (&row.close, &row.preclose) {
                 if let Some(f) = previous.get(&row.code.parse()?) {
                     row.factor = c as f64 / p as f64 * f.factor;
                     // 1. 由于数据源不同导致有误差，无法比较相等；

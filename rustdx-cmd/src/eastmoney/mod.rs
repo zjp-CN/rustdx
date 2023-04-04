@@ -1,5 +1,5 @@
 use eyre::{Result, WrapErr};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 /// 获取股票数据
 pub fn get(n: u16) -> Result<String> {
@@ -27,44 +27,36 @@ pub fn parse(text: &str) -> Result<EastMarket> {
 /// 用于（反）序列化：比如读取东方财富网页返回的 json ；把结果写入到 csv
 /// 注意：factor 需要提供前一天的 factor 数据才会计算（即 -p xx.csv）
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Day<'a> {
+pub struct Day {
     /// `date` 为 `%Y-%m-%d` 文本格式
     #[serde(skip_deserializing, default = "default_date")]
     pub date: String,
     #[serde(rename(deserialize = "f12"))]
     pub code: String,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f17"))]
-    pub open: F32<'a>,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f15"))]
-    pub high: F32<'a>,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f16"))]
-    pub low: F32<'a>,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f2"))]
-    pub close: F32<'a>,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f6"))]
-    pub amount: F32<'a>,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f5"))]
-    pub vol: F32<'a>,
-    #[serde(borrow)]
-    #[serde(rename(deserialize = "f18"))]
-    pub preclose: F32<'a>,
+    #[serde(rename(deserialize = "f17"), deserialize_with = "deser_opt_f32")]
+    pub open: F32,
+    #[serde(rename(deserialize = "f15"), deserialize_with = "deser_opt_f32")]
+    pub high: F32,
+    #[serde(rename(deserialize = "f16"), deserialize_with = "deser_opt_f32")]
+    pub low: F32,
+    #[serde(rename(deserialize = "f2"), deserialize_with = "deser_opt_f32")]
+    pub close: F32,
+    #[serde(rename(deserialize = "f6"), deserialize_with = "deser_opt_f32")]
+    pub amount: F32,
+    #[serde(rename(deserialize = "f5"), deserialize_with = "deser_opt_f32")]
+    pub vol: F32,
+    #[serde(rename(deserialize = "f18"), deserialize_with = "deser_opt_f32")]
+    pub preclose: F32,
     #[serde(skip_deserializing, default)]
     pub factor: f64,
 }
 
-/// 排除掉 "-" 无实际数据的股票（完全可以不必考虑这些无效数据）
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum F32<'a> {
-    Null(&'a str),
-    Yes(f32),
+fn deser_opt_f32<'de, D: Deserializer<'de>>(deserializer: D) -> Result<F32, D::Error> {
+    Ok(f32::deserialize(deserializer).ok())
 }
+
+/// 排除掉 "-" 无实际数据的股票（完全可以不必考虑这些无效数据）
+pub type F32 = Option<f32>;
 
 /// TODO： 最新的交易日，而不是当天
 fn default_date() -> String {
@@ -72,15 +64,13 @@ fn default_date() -> String {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EastMarket<'a> {
-    #[serde(borrow)]
-    pub data: EastData<'a>,
+pub struct EastMarket {
+    pub data: EastData,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct EastData<'a> {
+pub struct EastData {
     // pub diff:  Vec<Factor>,
-    #[serde(borrow)]
-    pub diff: Vec<Day<'a>>,
+    pub diff: Vec<Day>,
     pub total: u16,
 }
