@@ -661,7 +661,6 @@ dependencies = [
  "csv",
  "env_logger",
  "eyre",
- "insta",
  "log",
  "rustdx",
  "serde",

@@ -1,6 +1,7 @@
 #![feature(once_cell)]
-use rustdx_cmd::fetch_code;
-use std::sync::LazyLock;
+use rustdx_cmd::{eastmoney, fetch_code};
+use std::{collections::HashSet, sync::LazyLock};
+use tests_integration::snap;
 
 macro_rules! get {
     (sz) => {{
@@ -38,7 +39,8 @@ static SZ: LazyLock<Vec<String>> = LazyLock::new(|| get!(sz));
 ///  "sz000009", "sz000010", "sz000011"]
 /// ["sz301045", "sz301046", "sz301047", "sz301048", "sz301049", "sz301050", "sz301051",
 ///  "sz301052", "sz301053", "sz301055"]
-fn main() {
+#[test]
+fn head() {
     let (sh8, sh1, sz) = (&*SH8, &*SH1, &*SZ);
     println!(
         "sh8: {}\n{:?}\n{:?}",
@@ -61,11 +63,7 @@ fn main() {
 }
 
 #[test]
-fn save() -> eyre::Result<()> {
-    use insta::assert_debug_snapshot as snap;
-    use rustdx_cmd::eastmoney;
-    use std::collections::HashSet;
-
+fn stocklist() {
     let (sh8, sh1, sz) = (&*SH8, &*SH1, &*SZ);
     let (lsh8, lsh1, lsz) = (sh8.len(), sh1.len(), sz.len());
     snap!("sh1", sh1);
@@ -77,14 +75,12 @@ fn save() -> eyre::Result<()> {
     let l = lsh1 + lsh8 + lsz;
     snap!(l, @"4947");
 
-    let s = eastmoney::get(6000)?;
-    let res = eastmoney::parse(&s)?;
+    let res = eastmoney::fetch().unwrap();
     let east: HashSet<_> = res
         .data
         .diff
         .into_iter()
-        .filter(|v| matches!(v.open, eastmoney::F32::Yes(_))) // 这排除了不需要的股票
-        .map(|v| v.code)
+        .filter_map(|v| v.open.map(|_| v.code)) // 这排除了不需要的股票
         .collect();
     let mut v = east.iter().collect::<Vec<_>>();
     v.sort();
@@ -105,6 +101,4 @@ fn save() -> eyre::Result<()> {
     );
     snap!("diff_exchange-east", &exchange - &east);
     snap!("diff_east-exchange", &east - &exchange);
-
-    Ok(())
 }

@@ -24,6 +24,14 @@ pub fn parse(text: &str) -> Result<EastMarket> {
         .wrap_err_with(|| format!("解析东财股票数据失败，返回的文本为\n{text:?}"))
 }
 
+/// 获取并解析股票数据
+pub fn fetch() -> Result<EastMarket> {
+    // NOTE: 这与命令行默认的东财股票数量应该一致
+    const N: u16 = 6000;
+    let s = get(N)?;
+    parse(&s)
+}
+
 /// 用于（反）序列化：比如读取东方财富网页返回的 json ；把结果写入到 csv
 /// 注意：factor 需要提供前一天的 factor 数据才会计算（即 -p xx.csv）
 #[derive(Debug, Clone, Serialize, Deserialize)]
