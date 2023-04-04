@@ -212,11 +212,13 @@ pub fn insert_clickhouse(output: &impl AsRef<Path>, table: &str, keep: bool) -> 
         .args(&["--query", &query])
         .stdin(Redirection::File(File::open(output)?))
         .capture()?;
-    error!(
-        "stdout:\n{}stderr:\n{}",
-        capture.stdout_str(),
-        capture.stderr_str()
-    );
+    let stderr = capture.stderr_str();
+    if stderr.is_empty() {
+        info!("成功插入数据到 clickhouse 数据库");
+        debug!("clickhouse 返回结果：{}", capture.stdout_str());
+    } else {
+        error!("插入数据到 clickhouse 数据库时遇到：{stderr}");
+    };
     assert!(capture.success());
     keep_csv(output, keep)?;
     Ok(())
