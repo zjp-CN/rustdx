@@ -112,3 +112,71 @@ $ rustdx east -p clickhouse -o clickhouse -t rustdx.factor
 ## CHANGELOG
 
 [更新记录](https://github.com/zjp-CN/rustdx/blob/main/CHANGELOG.md)
+
+## 使用示例
+
+### 计算任何周期的涨跌幅
+
+```sql
+SELECT
+    code,
+    toYYYYMM(date) AS m, -- 这里以月周期为例
+    ((LAST_VALUE(factor) / FIRST_VALUE(factor)) * FIRST_VALUE(close)) / FIRST_VALUE(preclose) AS mgrowth
+FROM rustdx.factor -- 命令行参数中所写入的表名，假设你按照我上面给的命令行示例运行，那么原始数据在这个表
+GROUP BY code, m   -- 按照月聚合
+ORDER BY code ASC, m DESC;
+```
+
+为什么 `mgrowth` 是那样计算，见 [涨跌幅复权与前复权](https://zjp-cn.github.io/posts/qfq/)。
+
+### 计算前复权价格
+
+注意，上面计算涨幅时没有计算前复权价格，但大部分情况下必须知道前复权价格来计算价格相关的指标。
+
+那么可以每日数据成功入库之后，运行一次以下脚本，注意：
+* 这基于最新价来计算所有股票的所有历史前复权价格（在我的单核机器上需要 11 秒）
+* 每次运行脚本会把之前的计算结果清空
+* 前复权的结果在 `rustdx.qfq` 这个表（只有股票代码和价格）
+
+```sql
+-- 计算前复权价格
+DROP TABLE IF EXISTS rustdx.qfq_x; -- 临时表
+CREATE TABLE rustdx.qfq_x (
+    code FixedString(6),
+    x    Float64,
+    PRIMARY KEY(code)
+) ENGINE = MergeTree  AS 
+WITH
+qfq AS (
+    SELECT code, LAST_VALUE(close) / LAST_VALUE(factor) AS qfq_multi
+    FROM rustdx.factor
+    GROUP BY code
+    ORDER BY code
+)
+SELECT * FROM qfq;
+
+DROP TABLE IF EXISTS rustdx.qfq; -- 前复权价格
+CREATE TABLE rustdx.qfq (
+    date  Date,
+    code  FixedString(6),
+    close Float64,
+    open  Float64,
+    high  Float64,
+    low   Float64,
+    PRIMARY KEY(date, code)
+) ENGINE = MergeTree AS
+WITH
+qfq_x AS (SELECT * FROM rustdx.qfq_x),
+fct AS (
+    SELECT date, code, open/close AS open, high/close AS high, low/close AS low, factor
+    FROM rustdx.factor
+),
+raw AS (
+    SELECT *
+    FROM fct
+    LEFT JOIN qfq_x ON qfq_x.code = fct.code
+)
+SELECT date, code, factor*x AS close, open*close AS open, high*close AS high, low*close AS low
+FROM raw
+ORDER BY date, code
+```
