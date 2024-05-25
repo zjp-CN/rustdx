@@ -33,7 +33,7 @@ path = "../"
 
 [dependencies.ureq]
 version = "2"
-default_features = false
+default-features = false
 features = ["rustls"] 
 
 [[bin]]

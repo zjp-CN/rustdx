@@ -1,4 +1,4 @@
-#![feature(doc_auto_cfg)]
+#![cfg_attr(feature = "docsrs", feature(doc_auto_cfg))]
 
 pub mod bytes_helper;
 

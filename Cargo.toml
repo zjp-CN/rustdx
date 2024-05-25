@@ -39,6 +39,10 @@ opt-level = 3
 lto = true
 opt-level = 3
 
+[features]
+default = ["docsrs"]
+docsrs = []
+
 [workspace]
 members = ["rustdx-cmd", "tests-integration"]
 
@@ -51,3 +55,4 @@ serde = { version = "1", features = ["derive"] }
 
 [package.metadata.docs.rs]
 all-features = true
+
