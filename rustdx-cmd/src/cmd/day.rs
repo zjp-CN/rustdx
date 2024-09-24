@@ -20,6 +20,10 @@ pub struct DayCmd {
     #[argh(switch, short = 'k', long = "keep-csv")]
     pub keep_csv: bool,
 
+    /// 可选。指定时，表示保存 factor.csv 文件。
+    #[argh(switch)]
+    pub keep_factor: bool,
+
     /// 可选。指定复权数据（csv 文件路径）。如果没有指定这个参数，则不会计算复权。
     #[argh(option, short = 'g')]
     pub gbbq: Option<std::path::PathBuf>,

@@ -87,7 +87,7 @@ pub fn run_csv_fq_previous(cmd: &DayCmd) -> Result<()> {
     let gbbq = Gbbq::filter_hashmap(Gbbq::iter(&mut bytes[4..]));
 
     // 前收
-    let previous = previous_csv_table(&cmd.previous, &cmd.table)?;
+    let previous = previous_csv_table(&cmd.previous, &cmd.table, cmd.keep_factor)?;
 
     // 股票列表
     let hm = cmd.stocklist();
@@ -234,12 +234,16 @@ fn test_insert_clickhouse() -> Result<()> {
 
 type Previous = Result<std::collections::HashMap<u32, Factor>>;
 
-pub fn previous_csv_table(path: &Option<std::path::PathBuf>, table: &str) -> Previous {
+pub fn previous_csv_table(
+    path: &Option<std::path::PathBuf>,
+    table: &str,
+    keep_factor: bool,
+) -> Previous {
     if let Some(Some(path)) = path.as_ref().map(|p| p.to_str()) {
         if path == "clickhouse" {
-            clickhouse_factor_csv(table)
+            clickhouse_factor_csv(table, keep_factor)
         } else {
-            previous_csv(path)
+            previous_csv(path, keep_factor)
         }
     } else {
         Err(anyhow!("请检查 gbbq 路径"))
@@ -247,36 +251,47 @@ pub fn previous_csv_table(path: &Option<std::path::PathBuf>, table: &str) -> Pre
 }
 
 /// 读取前收盘价（前 factor ）数据
-pub fn previous_csv(p: impl AsRef<Path>) -> Previous {
+pub fn previous_csv(p: impl AsRef<Path>, keep_factor: bool) -> Previous {
     let path = p.as_ref();
     let prev = csv::Reader::from_reader(File::open(path)?)
         .deserialize::<Factor>()
         .filter_map(|f| f.ok())
         .map(|f| (f.code.parse().unwrap(), f))
         .collect();
-    fs::remove_file(path)?;
+    if !keep_factor {
+        fs::remove_file(path)?;
+    }
     Ok(prev)
 }
 
 /// 获取当前最新 factor
-fn clickhouse_factor_csv(table: &str) -> Previous {
-    let args = [
-        "--query",
-        &format!(
-            "SELECT
-                     yesterday() AS date,
-                     code,
-                     last_value(close) AS close,
-                     last_value(factor) AS factor
-                    FROM {table}
-                    GROUP BY code
-                    INTO OUTFILE 'factor.csv'
-                    FORMAT CSVWithNames;"
-        ),
-    ];
+fn clickhouse_factor_csv(table: &str, keep_factor: bool) -> Previous {
+    let query = format!(
+        "\
+WITH 
+  df AS (
+  SELECT
+    code,
+  arrayLast(
+      x->true, 
+      arraySort(x->x.1, groupArray((
+        date, close, factor
+      )))
+    ) AS t
+  FROM
+    {table}
+  GROUP BY
+    code
+  )
+SELECT code, t.1 AS date, t.2 AS close, t.3 AS factor FROM df
+INTO OUTFILE 'factor.csv'
+FORMAT CSVWithNames;"
+    );
+    let args = ["--query", &query];
     let output = Command::new("clickhouse-client").args(args).output()?;
+    info!("clickhouse-client --query {query:?}");
     check_output(output);
-    previous_csv("factor.csv")
+    previous_csv("factor.csv", keep_factor)
 }
 
 /// TODO: 与数据库有关的，把库名、表名可配置

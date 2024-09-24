@@ -20,6 +20,10 @@ pub struct EastCmd {
     #[argh(option, short = 'i')]
     pub ignore: Vec<String>,
 
+    /// 可选。指定时，表示保存 factor.csv 文件。
+    #[argh(switch)]
+    pub keep_factor: bool,
+
     /// 股票总个数，默认 6000。
     #[argh(option, short = 'n', default = "6000")]
     pub n: u16,
@@ -70,7 +74,8 @@ impl EastCmd {
     }
 
     fn _run_previous(&self, mut json: EastMarket) -> Result<()> {
-        let previous = crate::io::previous_csv_table(&self.previous, &self.table)?;
+        let previous =
+            crate::io::previous_csv_table(&self.previous, &self.table, self.keep_factor)?;
         let file = std::fs::File::create(&self.output)?;
         let mut wrt = csv::Writer::from_writer(file);
         for row in &mut json.data.diff {
@@ -101,6 +106,7 @@ impl EastCmd {
                         );
                     }
                 } else {
+                    warn!("{} 无前日收盘价数据", row.code);
                     row.factor = c as f64 / p as f64;
                 }
                 wrt.serialize(row)?;
