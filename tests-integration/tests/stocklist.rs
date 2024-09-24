@@ -1,4 +1,3 @@
-#![feature(once_cell)]
 use rustdx_cmd::{eastmoney, fetch_code};
 use std::{collections::HashSet, sync::LazyLock};
 use tests_integration::snap;
