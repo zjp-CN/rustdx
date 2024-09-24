@@ -1,6 +1,6 @@
 [package]
 name        = "rustdx"
-version     = "0.4.1"
+version     = "0.4.2"
 edition     = "2021"
 license     = "MIT"
 description = "受 pytdx 启发的 A 股数据获取库"
