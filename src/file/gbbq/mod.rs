@@ -58,7 +58,7 @@ pub struct Gbbq<'a> {
 
 impl<'a> Gbbq<'a> {
     #[inline]
-    pub fn from_chunk(chunk: &'a [u8]) -> Gbbq {
+    pub fn from_chunk(chunk: &'a [u8]) -> Gbbq<'a> {
         Self {
             market: u8_from_le_bytes(chunk, 0),
             code: unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) },
@@ -78,7 +78,7 @@ impl<'a> Gbbq<'a> {
     }
 
     // 解密二进制数据转化成 [`Gbbq`]
-    pub fn iter_deciphered(bytes: &'a [u8]) -> impl Iterator<Item = Gbbq> {
+    pub fn iter_deciphered(bytes: &'a [u8]) -> impl Iterator<Item = Gbbq<'a>> {
         bytes.chunks_exact(29).map(Self::from_chunk)
     }
 
@@ -128,7 +128,6 @@ impl<'a> Gbbq<'a> {
     }
 }
 
-///
 pub struct Gbbqs {
     data: Vec<u8>,
     /// 股本变迁的记录条数。这个数据在读取 `gbbq` 文件时就已经被解析了。

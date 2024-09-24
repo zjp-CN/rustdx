@@ -317,7 +317,7 @@ fn keep_csv(fname: &impl AsRef<Path>, keep: bool) -> io::Result<()> {
 
 /// 读取本地 xls(x) 文件
 pub fn read_xlsx(path: &str, col: usize, prefix: &str) -> Option<StockList> {
-    use calamine::{open_workbook_auto, DataType, Reader};
+    use calamine::{open_workbook_auto, Data, Reader};
     let mut workbook = open_workbook_auto(path).ok()?;
     let format_ = |x: &str| format!("{}{}", crate::cmd::auto_prefix(prefix, x), x);
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
@@ -327,9 +327,9 @@ pub fn read_xlsx(path: &str, col: usize, prefix: &str) -> Option<StockList> {
                 .rows()
                 .skip(1)
                 .map(|r| match &r[col] {
-                    DataType::Int(x) => format_(&x.to_string()),
-                    DataType::Float(x) => format_(&(*x as i64).to_string()),
-                    DataType::String(x) => format_(x),
+                    Data::Int(x) => format_(&x.to_string()),
+                    Data::Float(x) => format_(&(*x as i64).to_string()),
+                    Data::String(x) => format_(x),
                     _ => unreachable!(),
                 })
                 .collect(),

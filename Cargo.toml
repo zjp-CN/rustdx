@@ -13,7 +13,7 @@ exclude     = [
               ]
 
 [dependencies]
-miniz_oxide = "0.7"
+miniz_oxide = "0.8"
 log = { workspace = true }
 serde = { workspace = true }
 chrono = { workspace = true }

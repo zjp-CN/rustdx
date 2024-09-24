@@ -84,7 +84,7 @@ impl EastCmd {
                     #[cfg(debug_assertions)]
                     {
                         assert!(
-                            if self.ignore.get(0).map(|x| x == "all").unwrap_or(false) {
+                            if self.ignore.first().map(|x| x == "all").unwrap_or(false) {
                                 true
                             } else if (p as f64 - f.preclose).abs() < 0.01 {
                                 (row.factor - f.compute_factor(c as f64)).abs() < 0.01

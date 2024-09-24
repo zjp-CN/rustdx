@@ -52,7 +52,7 @@ pub fn get_offical_stocks(cond: &str) -> Result<StockList> {
 
 /// 深交所官网的 A 股和创业板股票信息。
 pub fn get_sz_stocks(set: &mut StockList) -> Result<usize> {
-    use calamine::{DataType, Reader, Xlsx};
+    use calamine::{Data, Reader, Xlsx};
     use std::io::Read;
     let (url, ex) = (
         "http://www.szse.cn/api/report/ShowReport?\
@@ -65,11 +65,9 @@ pub fn get_sz_stocks(set: &mut StockList) -> Result<usize> {
     // 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
     if let Some(Ok(range)) = workbook.worksheet_range_at(0) {
         set.extend(range.rows().skip(1).map(|r| match &r[4] {
-            DataType::Int(x) => format!("{ex}{x}"),
-            DataType::Float(x) => {
-                format!("{}{}", ex, *x as i64)
-            }
-            DataType::String(x) => format!("{ex}{x}"),
+            Data::Int(x) => format!("{ex}{x}"),
+            Data::Float(x) => format!("{ex}{}", *x as i64),
+            Data::String(x) => format!("{ex}{x}"),
             _ => unreachable!(),
         }));
         Ok(range.height() - 1)

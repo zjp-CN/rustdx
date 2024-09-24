@@ -1,4 +1,4 @@
-use calamine::{open_workbook_auto, DataType, Reader, Sheets};
+use calamine::{open_workbook_auto, Data, Reader, Sheets};
 use eyre::Result;
 use std::time::Instant;
 
@@ -65,7 +65,7 @@ fn read_excel(path: &str, ex: Exchange) -> Result<Sheets<FsReader>> {
         // alternatively, we can manually filter rows
         // assert_eq!(non_empty_cells,
         //            range.rows().flat_map(|r| r.iter().filter(|&c| c !=
-        // &DataType::Empty)).count());
+        // &Data::Empty)).count());
         range
             .rows()
             .next_back()
@@ -85,11 +85,11 @@ const fn match_ex(ex: Exchange) -> usize {
 }
 
 /// 每个单元格被解析的类型可能会不一样，所以把股票代码统一转化成字符型
-fn get_string(cell: &DataType) -> std::borrow::Cow<'_, str> {
+fn get_string(cell: &Data) -> std::borrow::Cow<'_, str> {
     match cell {
-        DataType::Int(x) => x.to_string().into(),
-        DataType::Float(x) => (*x as i64).to_string().into(),
-        DataType::String(x) => x.into(),
+        Data::Int(x) => x.to_string().into(),
+        Data::Float(x) => (*x as i64).to_string().into(),
+        Data::String(x) => x.into(),
         _ => unreachable!(),
     }
 }

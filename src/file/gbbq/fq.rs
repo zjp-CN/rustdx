@@ -37,10 +37,7 @@ impl Fq {
     /// 1. 上市日因子为 1。所以如果存在除权日先于上市日，直接舍弃先于上市日的除权日，
     ///    比如 #000001#、#601975#。
     /// 2. 解析后的交易日天数、除权日天数会在 debug build 下校验。
-    pub fn new(
-        days: impl Iterator<Item = Day> + ExactSizeIterator + Clone,
-        g1: &[Gbbq],
-    ) -> Option<Vec<Fq>> {
+    pub fn new(days: impl ExactSizeIterator<Item = Day> + Clone, g1: &[Gbbq]) -> Option<Vec<Fq>> {
         let count = days.len();
         let mut fqs: Vec<Fq> = Vec::with_capacity(count + 128);
         let mut preclose = days.clone().next()?.close as f64;
@@ -107,7 +104,7 @@ impl Fq {
     }
 
     pub fn concat(
-        days: impl Iterator<Item = Day> + ExactSizeIterator + Clone,
+        days: impl ExactSizeIterator<Item = Day> + Clone,
         g1: &[Gbbq],
         mut preclose: f64,
         mut factor: f64,
@@ -166,7 +163,7 @@ impl Fq {
         Some(fqs)
     }
 
-    pub fn no_gbbq(days: impl Iterator<Item = Day> + ExactSizeIterator + Clone) -> Option<Vec<Fq>> {
+    pub fn no_gbbq(days: impl ExactSizeIterator<Item = Day> + Clone) -> Option<Vec<Fq>> {
         let mut preclose = days.clone().next()?.close as f64;
         let mut factor = 1.;
         Some(
