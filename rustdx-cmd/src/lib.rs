@@ -5,3 +5,5 @@ pub mod fetch_code;
 
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate eyre;

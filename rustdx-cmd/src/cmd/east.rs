@@ -24,17 +24,9 @@ pub struct EastCmd {
     #[argh(switch)]
     pub keep_factor: bool,
 
-    /// 股票总个数，默认 6000。
-    #[argh(option, short = 'n', default = "6000")]
-    pub n: u16,
-
-    /// 以 json 格式显示
+    /// output 以 json 格式显示
     #[argh(switch, short = 'j')]
     pub json: bool,
-
-    /// 打印响应数据。
-    #[argh(switch, short = 's')]
-    pub show: bool,
 
     /// 可选。指定表名称，默认为 `rustdx.tmp`。
     #[argh(option, short = 't', default = "String::from(\"rustdx.tmp\")")]
@@ -45,16 +37,12 @@ impl EastCmd {
     /// 注意：即使没有提供前一天的 factor 数据，
     /// 产生的 csv 文件依然会有 factor 一列，但数据是 0.
     pub fn run_no_previous(&self) -> Result<()> {
-        let text = get(self.n)?;
-        let json = parse(&text)?;
-        if self.show {
-            println!("text:\n{text}\njson:\n{json:?}");
-        }
+        let data = fetch()?;
 
         {
             let file = std::fs::File::create(&self.output)?;
             let mut wrt = csv::Writer::from_writer(file);
-            for row in &json.data.diff {
+            for row in &data.data.diff {
                 if row.close.is_some() {
                     wrt.serialize(row)?;
                 }
@@ -64,21 +52,17 @@ impl EastCmd {
     }
 
     pub fn run_previous(&self) -> Result<()> {
-        let text = get(self.n)?;
-        let json = parse(&text)?;
-        if self.show {
-            println!("text:\n{text}\njson:\n{json:?}");
-        }
-        self._run_previous(json)?;
+        let data = fetch()?;
+        self._run_previous(data)?;
         self.insert_clickhouse()
     }
 
-    fn _run_previous(&self, mut json: EastMarket) -> Result<()> {
+    fn _run_previous(&self, mut data: EastMarket) -> Result<()> {
         let previous =
             crate::io::previous_csv_table(&self.previous, &self.table, self.keep_factor)?;
         let file = std::fs::File::create(&self.output)?;
         let mut wrt = csv::Writer::from_writer(file);
-        for row in &mut json.data.diff {
+        for row in &mut data.data.diff {
             // 排除掉无数据的股票：停牌、未上市之类
             if let (&Some(c), &Some(p)) = (&row.close, &row.preclose) {
                 if let Some(f) = previous.get(&row.code.parse()?) {
