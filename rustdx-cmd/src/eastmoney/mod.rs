@@ -2,16 +2,15 @@ use eyre::{Result, WrapErr};
 use serde::{Deserialize, Deserializer, Serialize};
 
 /// 获取股票数据
-pub fn get(n: u16) -> Result<String> {
+pub fn get(page_size: u16, page_number: u16) -> Result<String> {
     // 如果需要升序，使用 `order=code%2Case` 或者 `order=`
     // ashare => A 股，bshare => B 股，kshare => 科创板，equity => 前三种
     let url = format!(
-        "http://56.push2.eastmoney.com/api/qt/clist/get?\
-            cb=jQuery112407375845698232317_1631693257414&\
-            pn=1&pz={n}&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&\
-            fltt=2&invt=2&fid=f12&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23&\
-            fields=f18,f16,f12,f17,f15,f2,f6,f5&_=1631693257534",
+        "http://56.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112407375845698232317_1631693257414&\
+        pn={page_number}&pz={page_size}&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&\
+        invt=2&fid=f12&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23&fields=f18,f16,f12,f17,f15,f2,f6,f5&_=1631693257534"
     );
+    info!("Get: {url}");
     Ok(ureq::get(&url)
         .call()
         .wrap_err_with(|| format!("获取东财股票数据失败，网址为\n`{url:?}`"))?
@@ -26,10 +25,49 @@ pub fn parse(text: &str) -> Result<EastMarket> {
 
 /// 获取并解析股票数据
 pub fn fetch() -> Result<EastMarket> {
-    // NOTE: 这与命令行默认的东财股票数量应该一致
-    const N: u16 = 6000;
-    let s = get(N)?;
-    parse(&s)
+    // NOTE: 最多只能获取 100 条数据；page size 从第一页开始
+    const N: u16 = 100;
+
+    let mut done = 0u16;
+    let mut total = 0u16;
+    let mut v = Vec::with_capacity(6000);
+    loop {
+        let page_number = match (done, total) {
+            (0, 0) => 1, // init
+            (done, _) => {
+                ensure!(done > 1, "Done {done} should > 1");
+                (done - 1) / 100 + 1
+            }
+        };
+
+        let txt = get(N, page_number)?;
+        let data = parse(&txt)?;
+        total = data.data.total;
+        done = data.data.diff.len() as u16;
+        v.push(data);
+        info!("page_number={page_number} done={done} total={total}");
+        if done >= total {
+            break;
+        }
+    }
+    let mut diff = Vec::with_capacity(total as usize);
+    for each in v {
+        let dtotal = each.data.total;
+        ensure!(
+            dtotal == total,
+            "data.total {dtotal} should equal to {total}"
+        );
+        diff.extend(each.data.diff);
+    }
+    ensure!(
+        diff.len() as u16 == total,
+        "Aggregated res.len() {} should equal to {total}",
+        diff.len()
+    );
+
+    Ok(EastMarket {
+        data: EastData { diff, total },
+    })
 }
 
 /// 用于（反）序列化：比如读取东方财富网页返回的 json ；把结果写入到 csv
