@@ -6,9 +6,10 @@ pub fn get(page_size: u16, page_number: u16) -> Result<String> {
     // 如果需要升序，使用 `order=code%2Case` 或者 `order=`
     // ashare => A 股，bshare => B 股，kshare => 科创板，equity => 前三种
     let url = format!(
-        "http://56.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112407375845698232317_1631693257414&\
-        pn={page_number}&pz={page_size}&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&\
-        invt=2&fid=f12&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23&fields=f18,f16,f12,f17,f15,f2,f6,f5&_=1631693257534"
+        "https://push2.eastmoney.com/api/qt/clist/get?np=1&fltt=1&invt=2&\
+        cb=jQuery37108306728141019732_1742893112795&fs=m%3A0%2Bt%3A6%2Cm%3A0%2Bt%3A80%2Cm%3A1%2Bt%3A2%2Cm%3A1%2Bt%3A23%2Cm%3A0%2Bt%3A81%2Bs%3A2048&\
+        fields=f12%2Cf13%2Cf14%2Cf1%2Cf2%2Cf4%2Cf3%2Cf152%2Cf5%2Cf6%2Cf7%2Cf15%2Cf18%2Cf16%2Cf17%2Cf10%2Cf8%2Cf9%2Cf23&\
+        fid=f12&pn={page_number}&pz={page_size}&po=1&dect=1&ut=fa5fd1943c7b386f172d6893dbfba10b&wbp2u=%7C0%7C0%7C0%7Cweb&_=1742893112836"
     );
     info!("Get: {url}");
     Ok(ureq::get(&url)
