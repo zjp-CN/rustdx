@@ -17,13 +17,9 @@ jobs:
     # Runs when the commit message contains "[Release]"
     if: "contains(github.event.head_commit.message, '[Release]')"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          default: true
-          profile: minimal
+        uses: dtolnay/rust-toolchain@nightly
       - name: Build
         run: cargo build -p rustdx-cmd --release
 
@@ -45,7 +41,7 @@ jobs:
       # This will draft a new release & will attach the binaries produced by the above outputs.
       # You still need to publish this release though after job ends.
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v4
         with:
           tag_name: ${{ github.ref }}
           # name: Release ${{ github.ref }}
