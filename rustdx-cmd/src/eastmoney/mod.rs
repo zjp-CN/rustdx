@@ -1,4 +1,4 @@
-use eyre::{Result, WrapErr};
+use eyre::{ContextCompat, Result, WrapErr};
 use serde::{Deserialize, Deserializer, Serialize};
 
 /// 获取股票数据
@@ -20,7 +20,10 @@ pub fn get(page_size: u16, page_number: u16) -> Result<String> {
 
 pub fn parse(text: &str) -> Result<EastMarket> {
     // jQuery112407375845698232317_1631693257414();
-    serde_json::from_str(&text[42..text.len() - 2])
+    let start = text
+        .find('{')
+        .wrap_err_with(|| format!("{text:?} 不含 JSON"))?;
+    serde_json::from_str(&text[start..text.len() - 2])
         .wrap_err_with(|| format!("解析东财股票数据失败，返回的文本为\n{text:?}"))
 }
 
