@@ -32,18 +32,15 @@ pub fn fetch(max: Option<u16>) -> Result<EastMarket> {
     let mut total;
     let mut v = Vec::with_capacity(6000);
     loop {
-        let page_number = if done == 0 {
-            1 // init
-        } else {
-            (done - 1) / 100 + 1
-        };
+        let page_number = done / 100 + 1;
 
         let txt = get(N, page_number)?;
         let data = parse(&txt)?;
         total = data.data.total;
-        done = data.data.diff.len() as u16;
+        let len = data.data.diff.len();
+        done += len as u16;
         v.push(data);
-        info!("page_number={page_number} done={done} max={max:?} total={total}");
+        info!("page_number={page_number} len={len} done={done} max={max:?} total={total}");
         if done >= max.unwrap_or(total) {
             break;
         }
@@ -51,12 +48,15 @@ pub fn fetch(max: Option<u16>) -> Result<EastMarket> {
     let mut diff = Vec::with_capacity(total as usize);
     for each in v {
         let dtotal = each.data.total;
+        // 保证所有响应的 total 一致
         ensure!(
             dtotal == total,
             "data.total {dtotal} should equal to {total}"
         );
         diff.extend(each.data.diff);
     }
+
+    // 这里的数据保留了无效值（退市）的股票，因此严格检查数量
     if max.is_none() {
         ensure!(
             diff.len() as u16 == total,
