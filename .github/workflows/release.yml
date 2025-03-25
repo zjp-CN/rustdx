@@ -41,7 +41,7 @@ jobs:
       # This will draft a new release & will attach the binaries produced by the above outputs.
       # You still need to publish this release though after job ends.
       - name: Release
-        uses: softprops/action-gh-release@v4
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref }}
           # name: Release ${{ github.ref }}
