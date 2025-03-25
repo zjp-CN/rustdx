@@ -24,20 +24,18 @@ pub fn parse(text: &str) -> Result<EastMarket> {
 }
 
 /// 获取并解析股票数据
-pub fn fetch() -> Result<EastMarket> {
+pub fn fetch(max: Option<u16>) -> Result<EastMarket> {
     // NOTE: 最多只能获取 100 条数据；page size 从第一页开始
     const N: u16 = 100;
 
     let mut done = 0u16;
-    let mut total = 0u16;
+    let mut total;
     let mut v = Vec::with_capacity(6000);
     loop {
-        let page_number = match (done, total) {
-            (0, 0) => 1, // init
-            (done, _) => {
-                ensure!(done > 1, "Done {done} should > 1");
-                (done - 1) / 100 + 1
-            }
+        let page_number = if done == 0 {
+            1 // init
+        } else {
+            (done - 1) / 100 + 1
         };
 
         let txt = get(N, page_number)?;
@@ -45,8 +43,8 @@ pub fn fetch() -> Result<EastMarket> {
         total = data.data.total;
         done = data.data.diff.len() as u16;
         v.push(data);
-        info!("page_number={page_number} done={done} total={total}");
-        if done >= total {
+        info!("page_number={page_number} done={done} max={max:?} total={total}");
+        if done >= max.unwrap_or(total) {
             break;
         }
     }
@@ -59,11 +57,13 @@ pub fn fetch() -> Result<EastMarket> {
         );
         diff.extend(each.data.diff);
     }
-    ensure!(
-        diff.len() as u16 == total,
-        "Aggregated res.len() {} should equal to {total}",
-        diff.len()
-    );
+    if max.is_none() {
+        ensure!(
+            diff.len() as u16 == total,
+            "Aggregated res.len() {} should equal to {total}",
+            diff.len()
+        );
+    }
 
     Ok(EastMarket {
         data: EastData { diff, total },
