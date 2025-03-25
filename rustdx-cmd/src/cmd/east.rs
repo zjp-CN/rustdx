@@ -24,6 +24,10 @@ pub struct EastCmd {
     #[argh(switch)]
     pub keep_factor: bool,
 
+    /// 股票总个数，默认全部。
+    #[argh(option)]
+    pub max: Option<u16>,
+
     /// output 以 json 格式显示
     #[argh(switch, short = 'j')]
     pub json: bool,
@@ -37,7 +41,7 @@ impl EastCmd {
     /// 注意：即使没有提供前一天的 factor 数据，
     /// 产生的 csv 文件依然会有 factor 一列，但数据是 0.
     pub fn run_no_previous(&self) -> Result<()> {
-        let data = fetch()?;
+        let data = fetch(self.max)?;
 
         {
             let file = std::fs::File::create(&self.output)?;
@@ -52,7 +56,7 @@ impl EastCmd {
     }
 
     pub fn run_previous(&self) -> Result<()> {
-        let data = fetch()?;
+        let data = fetch(self.max)?;
         self._run_previous(data)?;
         self.insert_clickhouse()
     }

@@ -74,7 +74,7 @@ fn stocklist() {
     let l = lsh1 + lsh8 + lsz;
     snap!(l, @"4947");
 
-    let res = eastmoney::fetch().unwrap();
+    let res = eastmoney::fetch(None).unwrap();
     let east: HashSet<_> = res
         .data
         .diff
