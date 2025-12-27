@@ -72,7 +72,7 @@ impl<'a> Gbbq<'a> {
     }
 
     // 未解密二进制数据转化成 [`Gbbq`]
-    pub fn iter(bytes: &mut [u8]) -> impl Iterator<Item = Gbbq> {
+    pub fn iter(bytes: &mut [u8]) -> impl Iterator<Item = Gbbq<'_>> {
         bytes.chunks_exact_mut(29).map(parse).map(Gbbq::from_chunk)
         // bytes.chunks_exact_mut(29).map(parse).map(Gbbq::from_chunk_mut)
     }
@@ -157,7 +157,7 @@ impl Gbbqs {
     ///    的结果为原始的、未解密的二进制数据。
     /// 2. 当第一次调用这个方法之后，[`Gbbqs::get_data`] 或 [`Gbbqs::get_data_mut`]
     ///    的结果为解密后的二进制数据。
-    pub fn to_vec(&mut self) -> Vec<Gbbq> {
+    pub fn to_vec(&mut self) -> Vec<Gbbq<'_>> {
         if self.parsed {
             self.data[4..]
                 .chunks_exact(29)

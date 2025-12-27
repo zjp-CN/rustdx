@@ -1,10 +1,10 @@
 [package]
-name        = "rustdx"
-version     = "0.4.2"
+name        = "rustdx-complete"
+version     = "0.5.0"
 edition     = "2021"
 license     = "MIT"
-description = "受 pytdx 启发的 A 股数据获取库"
-repository  = "https://github.com/zjp-CN/rustdx"
+description = "功能完整的 A 股数据获取库，完全对标 pytdx"
+repository  = "https://github.com/jackluo2012/rustdx"
 authors     = ["zjp <jiping_zhou@foxmail.com>"]
 exclude     = [
                 "assets", "examples", "benches", "tests", "old", "tests-integration",

@@ -147,6 +147,12 @@ impl Tdx for SecurityList {
 
 #[test]
 fn connection() -> Result<()> {
+    // 跳过集成测试，如果设置了环境变量
+    if std::env::var("RUSTDX_SKIP_INTEGRATION_TESTS").is_ok() {
+        println!("⚠️  跳过集成测试 (RUSTDX_SKIP_INTEGRATION_TESTS 已设置)");
+        return Ok(());
+    }
+
     SecurityList::default().recv_parsed(&mut crate::tcp::Tcp::new()?)?;
     Ok(())
 }

@@ -1,7 +1,7 @@
 use argh::FromArgs;
 use eyre::Result;
-use rustdx_cmd::fetch_code;
-use rustdx_cmd::fetch_code::StockList;
+use rustdx_complete_cmd::fetch_code;
+use rustdx_complete_cmd::fetch_code::StockList;
 
 /// 例子：`rustdx day /vdb/tmp/tdx/sh/ /vdb/tmp/tdx/sz/ -l official -g ../assets/gbbq`。
 #[derive(FromArgs, PartialEq, Debug)]

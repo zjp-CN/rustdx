@@ -162,15 +162,17 @@ pub fn send_recv(tcp: &mut Tcp, send: &[u8], tag: &str) -> Result<(Vec<u8>, u16,
 }
 
 /// 默认的超时值。
-pub const TIMEOUT: Duration = Duration::from_millis(100);
+///
+/// 增加到5秒，以适应网络延迟和服务器的响应时间
+pub const TIMEOUT: Duration = Duration::from_secs(5);
 
-/// 快速引入 tcpstream，设置 100 毫秒超时。
+/// 快速引入 tcpstream，设置 5 秒超时。
 /// TODO: 固定？随机？取最快的 ip？
 pub fn tcpstream() -> Result<(TcpStream, BufTcp, [u8; RECV_SIZE])> {
     tcpstream_ip(&ip::STOCK_IP[0])
 }
 
-/// 快速引入 tcpstream，设置 100 毫秒超时。
+/// 快速引入 tcpstream，设置 5 秒超时。
 pub fn tcpstream_ip(ip: &SocketAddr) -> Result<(TcpStream, BufTcp, [u8; RECV_SIZE])> {
     let stream = TcpStream::connect_timeout(ip, TIMEOUT)?;
     stream.set_read_timeout(Some(TIMEOUT))?;

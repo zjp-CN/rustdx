@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 tabled = "0.16"
 insta = "1"
-rustdx = { path = "../" }
+rustdx-complete = { path = "../" }
 rustdx-cmd = { path = "../rustdx-cmd" }
 chrono = { workspace = true }
 

@@ -5,6 +5,11 @@ use std::io::Result;
 
 #[test]
 fn tcp_security_count() -> Result<()> {
+    if std::env::var("RUSTDX_SKIP_INTEGRATION_TESTS").is_ok() {
+        println!("⚠️  跳过集成测试 (RUSTDX_SKIP_INTEGRATION_TESTS 已设置)");
+        return Ok(());
+    }
+
     let mut tcp = Tcp::new()?;
 
     let mut count = tcp::SecurityCount::new(0); // sz
@@ -22,6 +27,11 @@ fn tcp_security_count() -> Result<()> {
 
 #[test]
 fn tcp_security_list() -> Result<()> {
+    if std::env::var("RUSTDX_SKIP_INTEGRATION_TESTS").is_ok() {
+        println!("⚠️  跳过集成测试 (RUSTDX_SKIP_INTEGRATION_TESTS 已设置)");
+        return Ok(());
+    }
+
     let mut list = tcp::SecurityList::default(); // sz
     assert_debug_snapshot!("security-list-send", list.send);
     list.recv_parsed(&mut Tcp::new()?)?;

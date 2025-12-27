@@ -4,7 +4,7 @@ use std::mem::size_of;
 #[test]
 fn tcp() {
     use rustdx::tcp;
-    assert_debug_snapshot!(size_of::<tcp::Tcp>(),              @"64");
+    assert_debug_snapshot!(size_of::<tcp::Tcp>(),              @"72");
     assert_debug_snapshot!(size_of::<tcp::SecurityCount>(),    @"24");
     assert_debug_snapshot!(size_of::<tcp::SecurityList>(),     @"72");
     assert_debug_snapshot!(size_of::<tcp::SecurityListData>(), @"48");

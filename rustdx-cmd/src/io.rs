@@ -1,10 +1,10 @@
 use crate::cmd::DayCmd;
 use eyre::{anyhow, Result};
-use rustdx::file::{
+use rustdx_complete::file::{
     day::fq::Day,
     gbbq::{Factor, Gbbq},
 };
-use rustdx_cmd::fetch_code::StockList;
+use rustdx_complete_cmd::fetch_code::StockList;
 use std::{
     fs::{self, File},
     io::{self, Write},

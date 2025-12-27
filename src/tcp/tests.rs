@@ -13,10 +13,19 @@ macro_rules! compare {
 
 use super::{Result, Tcp, Tdx};
 
+/// 连接测试辅助函数。
+///
+/// 注意：这是一个集成测试，需要实际的网络连接。
+/// 如果设置了环境变量 `RUSTDX_SKIP_INTEGRATION_TESTS=1`，则会跳过测试。
 pub fn connection<T: Tdx>(mut tdx: T) -> Result<()>
 where
     <T as Tdx>::Item: std::fmt::Debug,
 {
+    if std::env::var("RUSTDX_SKIP_INTEGRATION_TESTS").is_ok() {
+        println!("⚠️  跳过集成测试 (RUSTDX_SKIP_INTEGRATION_TESTS 已设置)");
+        return Ok(());
+    }
+
     println!("send: {:?}", tdx.send());
     println!("recv: {:?}", tdx.recv_parsed(&mut Tcp::new()?)?);
     Ok(())
@@ -27,6 +36,11 @@ pub fn connection_mut<T: Tdx>(tdx: &mut T) -> Result<()>
 where
     <T as Tdx>::Item: std::fmt::Debug,
 {
+    if std::env::var("RUSTDX_SKIP_INTEGRATION_TESTS").is_ok() {
+        println!("⚠️  跳过集成测试 (RUSTDX_SKIP_INTEGRATION_TESTS 已设置)");
+        return Ok(());
+    }
+
     println!("send: {:?}", tdx.send());
     let res = tdx.recv_parsed(&mut Tcp::new()?)?;
     println!("recv: {res:?}");

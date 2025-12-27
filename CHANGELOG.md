@@ -1,5 +1,113 @@
 # Changelog
 
+## [Unreleased]
+
+## v0.5.0 (2025-12-27)
+
+### 新增功能 (Features)
+
+#### 核心功能模块（完全对标 pytdx）
+
+1. **SecurityQuotes** - 实时行情数据
+   - ✅ 支持股票实时行情（`get_security_quotes`）
+   - ✅ 支持指数实时行情（上证指数、深证成指、沪深300等）
+   - ✅ 可同时获取多只股票/指数的行情快照
+   - ✅ 返回字段：当前价、今开、最高、最低、成交量、成交额、买卖五档等
+
+2. **FinanceInfo** - 财务信息（32个财务字段）
+   - ✅ 基本信息：股票代码、上市日期、更新日期、所属省份、所属行业
+   - ✅ 股本结构：总股本、流通股本、国家股、法人股、B股、H股、职工股
+   - ✅ 资产负债：总资产、流动资产、固定资产、无形资产、净资产
+   - ✅ 利润表：主营收入、主营利润、营业利润、净利润
+   - ✅ 现金流：经营现金流、总现金流
+   - ✅ 对应 pytdx 的 `get_finance_info`
+
+3. **Transaction** - 逐笔成交数据
+   - ✅ tick-level 成交数据
+   - ✅ 返回字段：时间、价格、成交量、成交号、买卖方向
+   - ✅ 支持分页获取历史逐笔数据
+   - ✅ 对应 pytdx 的 `get_transaction_data`
+
+4. **MinuteTime** - 分时数据
+   - ✅ 当日分时成交数据（240个数据点）
+   - ✅ 返回字段：时间(HH:MM)、价格、成交量
+   - ✅ 对应 pytdx 的 `get_minute_time_data`
+
+5. **SecurityList** - 股票列表
+   - ✅ 获取所有股票代码和名称
+   - ✅ 支持分页查询（每次1000只）
+   - ✅ 对应 pytdx 的 `get_security_list`
+
+6. **IndexQuotes** - 指数行情
+   - ✅ 上证指数(000001)、深证成指(399001)、沪深300(000300)等
+   - ✅ 由 SecurityQuotes 模块统一支持
+   - ✅ 对应 pytdx 的指数行情功能
+
+#### 示例程序和测试
+
+- 新增 `test_security_quotes.rs` - 股票和指数行情示例
+- 新增 `test_finance_info.rs` - 财务信息示例
+- 新增 `test_transaction.rs` - 逐笔成交示例
+- 新增 `test_minute_time.rs` - 分时数据示例
+- 新增 `test_security_list.rs` - 股票列表示例
+- 新增 `test_index_quotes.rs` - 指数行情示例
+
+### Bug 修复
+
+#### 关键Bug修复：SecurityQuotes 发送长度问题
+
+- **问题描述**：`send()` 方法返回整个582字节缓冲区而非实际需要长度，导致所有 SecurityQuotes 调用失败（"failed to fill whole buffer"）
+- **影响范围**：影响所有使用 SecurityQuotes 的功能（股票和指数行情）
+- **修复方案**：重写 `send()` 方法，只返回实际需要的字节数（22 + stocks.len() * 7）
+- **验证结果**：
+  - 单元测试：29/29 通过
+  - 实际数据验证：股票、指数行情全部正常
+
+### 文档更新
+
+- README.md 新增"rustdx 库使用"章节，包含：
+  - 8大核心功能对照表
+  - 6个详细使用示例（股票行情、指数行情、K线、财务、分时、逐笔）
+  - 市场代码说明
+  - 超时设置说明
+  - 完整示例程序列表
+
+### 测试验证
+
+- 单元测试：29/29 通过
+- 功能验证：
+  - 上证指数(000001): 3963.68 (+0.02%) ✅
+  - 深证成指(399001): 13603.89 (+0.01%) ✅
+  - 沪深300(000300): 4657.24 (+0.00%) ✅
+  - 平安银行财务数据：32个字段全部获取 ✅
+  - 逐笔成交数据：正常解析 ✅
+  - 分时数据：240个数据点 ✅
+
+### pytdx 功能完整性
+
+rustdx 现已**完全实现** pytdx 的核心功能：
+
+| 功能 | rustdx 模块 | pytdx 对应 | 状态 |
+|------|------------|-----------|------|
+| 日K线 | `Kline` | `get_security_bars` | ✅ |
+| 除权数据 | `Xdxr` | `get_xdxr` | ✅ |
+| 股票行情 | `SecurityQuotes` | `get_security_quotes` | ✅ |
+| 股票列表 | `SecurityList` | `get_security_list` | ✅ |
+| 分时数据 | `MinuteTime` | `get_minute_time_data` | ✅ |
+| 逐笔成交 | `Transaction` | `get_transaction_data` | ✅ |
+| 财务信息 | `FinanceInfo` | `get_finance_info` | ✅ |
+| 指数行情 | `SecurityQuotes` | `get_index_quotes` | ✅ |
+
+### 代码统计
+
+- 新增模块：3个（finance_info, transaction, minute_time）
+- 修改模块：2个（quotes 修复bug, mod.rs 导出）
+- 新增示例程序：6个
+- 新增Python验证脚本：6个
+- 代码行数：+1297行
+
+---
+
 ## v0.4.0 (2023-02-21)
 
 rustdx-cmd：

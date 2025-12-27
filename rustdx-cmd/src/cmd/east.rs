@@ -1,6 +1,6 @@
 use argh::FromArgs;
 use eyre::Result;
-use rustdx_cmd::eastmoney::*;
+use rustdx_complete_cmd::eastmoney::*;
 
 /// 东方财富当日 A 股数据。多数情况下使用 `rustdx east -p factor.csv` 即可。
 #[derive(FromArgs, PartialEq, Debug)]
