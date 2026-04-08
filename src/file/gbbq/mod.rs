@@ -61,7 +61,7 @@ impl<'a> Gbbq<'a> {
     pub fn from_chunk(chunk: &'a [u8]) -> Gbbq<'a> {
         Self {
             market: u8_from_le_bytes(chunk, 0),
-            code: unsafe { std::str::from_utf8_unchecked(chunk.get_unchecked(1..7)) },
+            code: std::str::from_utf8(&chunk[1..7]).unwrap(),
             date: u32_from_le_bytes(chunk, 8),
             category: u8_from_le_bytes(chunk, 12),
             fh_qltp: f32_from_le_bytes(chunk, 13),
@@ -231,10 +231,8 @@ pub fn parse(encrypt: &mut [u8]) -> &[u8] {
             numold = ebx;
         }
         numold ^= u32_from_le_bytes(KEY, 0);
-        unsafe { (encrypt.get_unchecked_mut(i..i + 4)).swap_with_slice(&mut numold.to_le_bytes()) };
-        unsafe {
-            (encrypt.get_unchecked_mut(i + 4..i + 8)).swap_with_slice(&mut num.to_le_bytes())
-        };
+        encrypt[i..i + 4].swap_with_slice(&mut numold.to_le_bytes());
+        encrypt[i + 4..i + 8].swap_with_slice(&mut num.to_le_bytes());
         pos += 8;
     }
     encrypt
