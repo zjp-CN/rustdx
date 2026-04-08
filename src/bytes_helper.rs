@@ -3,7 +3,7 @@
 #[inline]
 pub fn into_arr4(slice: &[u8], pos: usize) -> [u8; 4] {
     let mut arr = [0; 4];
-    arr.copy_from_slice(unsafe { slice.get_unchecked(pos..pos + 4) });
+    arr.copy_from_slice(&slice[pos..pos + 4]);
     arr
 }
 
