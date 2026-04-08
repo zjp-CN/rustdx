@@ -21,7 +21,7 @@ pub fn f32_from_le_bytes(slice: &[u8], pos: usize) -> f32 {
 #[inline]
 pub fn into_arr2(slice: &[u8], pos: usize) -> [u8; 2] {
     let mut arr = [0; 2];
-    arr.copy_from_slice(unsafe { slice.get_unchecked(pos..pos + 2) });
+    arr.copy_from_slice(&slice[pos..pos + 2]);
     arr
 }
 
@@ -34,7 +34,7 @@ pub fn u16_from_le_bytes(slice: &[u8], pos: usize) -> u16 {
 pub fn u8_from_le_bytes(slice: &[u8], pos: usize) -> u8 {
     u8::from_le_bytes({
         let mut arr = [0];
-        arr.copy_from_slice(unsafe { slice.get_unchecked(pos..pos + 1) });
+        arr.copy_from_slice(&slice[pos..pos + 1]);
         arr
     })
 }
