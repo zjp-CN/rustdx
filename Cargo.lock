@@ -873,7 +873,7 @@ checksum = "a157657054ffe556d8858504af8a672a054a6e0bd9e8ee531059100c0fa11bb2"
 
 [[package]]
 name = "rustdx"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "chrono",
  "csv",
